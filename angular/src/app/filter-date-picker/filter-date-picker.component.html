@@ -1,0 +1,24 @@
+<div>
+    <div class="card mb-3">
+        <div class="card-header">
+            {{datePicker.title}}
+        </div>
+        <div class="card-body">
+            <mat-form-field appearance="fill">
+                <mat-label>start date</mat-label>
+                <input matInput [matDatepicker]="startDate" [(ngModel)]="start"
+                       (dateChange)="setDate($event,'start')">
+                <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+                <mat-datepicker #startDate></mat-datepicker>
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+                <mat-label>end date</mat-label>
+                <input matInput [matDatepicker]="EndDate" [(ngModel)]="end"
+                       (dateChange)="setDate($event,'end')">
+                <mat-datepicker-toggle matSuffix [for]="EndDate"></mat-datepicker-toggle>
+                <mat-datepicker #EndDate></mat-datepicker>
+            </mat-form-field>
+            <button type="submit" class="searchButton" (click)="applyDate()">apply</button>
+        </div>
+    </div>
+</div>

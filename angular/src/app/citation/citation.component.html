@@ -1,0 +1,22 @@
+<div>
+    <h2 mat-dialog-title>Citation</h2>
+    <mat-dialog-content class="mat-typography">
+        <div *ngIf="result.getTitle() !== undefined">
+            <div>
+                <span class="font-weight-bold">title:</span> {{result.getTitle()}}
+            </div>
+            <div>
+                <span class="font-weight-bold">creator:</span> {{result.getCreator()}}
+            </div>
+            <div>
+                <span class="font-weight-bold">date:</span> {{result.getDate()}}
+            </div>
+        </div>
+        <div *ngIf="result.getTitle() === undefined">
+            {{result.getSource()}}
+        </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button class="modal-button btn" mat-dialog-close>close</button>
+    </mat-dialog-actions>
+</div>

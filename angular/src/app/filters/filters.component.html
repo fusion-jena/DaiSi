@@ -1,0 +1,44 @@
+<div>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="mb-3">
+                    <span class="ml-2 linkBlue" (click)="onClearAllFilters()">Clear All Filters</span>
+                </div>
+                <div class="my-3">
+                            <span *ngFor="let item of filterValues; let i=index"
+                                  class="badge badge-info mt-1 px-2 mr-1">{{item}}
+                                <span class="removeFilter" (click)="removeFilter(i)">&times;</span>
+                            </span>
+                </div>
+                <div *ngFor="let item of facets; let i=index">
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            {{item.getTitle()}}
+                        </div>
+                        <div class="card-body">
+                            <app-filter-box [filters]="item"
+                                            (chosenFacet)="sendFilter($event)"></app-filter-box>
+                        </div>
+                    </div>
+                </div>
+                <div *ngFor="let item of otherFilters">
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            {{item.title}}
+                        </div>
+                        <div class="card-body">
+                            <app-other-filters [filter]="item.parameters" [filterValues] = "filterValues"
+                                               (chosenFilter)="sendFilter($event)"></app-other-filters>
+                        </div>
+                    </div>
+                </div>
+                <div *ngFor="let datePicker of datePickers">
+                    <app-filter-date-picker [datePicker]="datePicker" [filters] = "chosenFilter" [filterValues] = "filterValues"
+                                            (chosenDate)="applyDate($event,datePicker)"></app-filter-date-picker>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
