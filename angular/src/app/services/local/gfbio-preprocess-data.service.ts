@@ -1,23 +1,33 @@
 import {Injectable} from '@angular/core';
-import {Result} from '../../models/gfbio/result';
-import {Hit} from '../../models/gfbio/hit';
-import {Citation} from '../../models/gfbio/citation';
+import {Result} from '../../models/result/result';
+import {Hit} from '../../models/result/hit';
+import {Citation} from '../../models/result/citation';
 import {CommunicationService} from './communication.service';
-import {Aggregations} from '../../models/gfbio/aggregations';
-import {Bucket} from '../../models/gfbio/bucket';
+import {Aggregations} from '../../models/result/aggregations';
+import {Bucket} from '../../models/result/bucket';
+import {Description} from '../../models/result/description';
 
 @Injectable({
     providedIn: 'root'
 })
+
 export class GfbioPreprocessDataService {
+
+    public static dataCenter = 'Data Center';
+    public static dataType = 'Data Type';
+    public static parameter = 'Parameter';
+    public static taxonomy = 'Taxonomy';
+    public static geographicRegion = 'Geographic Region';
+    public static type = 'Type';
+
 
     constructor(private communicationService: CommunicationService) {
     }
 
-    getResult(jsonObject): Result {
+    getResult(jsonObject, otherParameters: Array<any>): Result {
         const result = new Result();
         result.setSemanticKeys(jsonObject?.lastItem);
-        const hits: Hit[] = this.getHits(jsonObject);
+        const hits: Hit[] = this.getHits(jsonObject, otherParameters[0]);
         result.setHits(hits);
         result.setAggregations(this.getAggregations(jsonObject));
         result.setTotalNumber(jsonObject?.hits?.total);
@@ -26,11 +36,11 @@ export class GfbioPreprocessDataService {
         return result;
     }
 
-    getHits(jsonObject): Hit[] {
+    getHits(jsonObject, semantic): Hit[] {
         const hits: Hit[] = [];
         const hitsOfObject = jsonObject?.hits?.hits;
         hitsOfObject.forEach(item => {
-            hits.push(this.getHit(item));
+            hits.push(this.getHit(item, semantic));
         });
         return hits;
     }
@@ -62,49 +72,87 @@ export class GfbioPreprocessDataService {
         return citation;
     }
 
-    getHit(item): Hit {
+    getHit(item, semantic): Hit {
         const source = item?._source;
         const hit = new Hit();
         const citation = this.getCitation(source);
         hit.setCitation(citation);
-        hit.setTitle(source?.citation_title);
+        const dom = document.createRange()
+            .createContextualFragment(source?.['html-1']);
+        const titleURL = dom?.querySelector('.citation a')?.getAttribute('href');
+		if(titleURL === undefined || titleURL === 'undefined'){
+			hit.setTitleUrl('undefined');
+		}
+		else{
+			hit.setTitleUrl(titleURL);
+		}
+        let topic = '';
+        dom?.querySelectorAll('.citation span').forEach(spanValue => {
+            topic = topic + spanValue.innerHTML;
+            if (spanValue.classList.contains('date')) {
+                topic = topic + ': ';
+            }
+        });
+        hit.setTitle(topic);
+        const tr = dom?.querySelectorAll('.desc tr');
+        const description = [];
+        tr.forEach(row => {
+            const title = row?.querySelectorAll('td')?.[0]?.innerHTML;
+            const value = row?.querySelectorAll('td')?.[1]?.innerText;
+            if (title === 'Parameters:' || title === 'Summary:') {
+                const descriptionItem = new Description();
+                descriptionItem.setTitle(title);
+                descriptionItem.setValue(value);
+                description.push(descriptionItem);
+            }
+        });
+        hit.setDescription(description);
         hit.setAccessType(source?.accessRestricted);
         let dataCenter = source?.dataCenter.split(' ').pop();
         if (dataCenter === 'Science') {
             dataCenter = 'PANGAEA';
         }
         hit.setDataCentre(dataCenter);
-        hit.setDescription(source?.description);
-        hit.setLicence(source?.licenseShort);
-        const allLicences = ['CC BY', 'CC BY-NC', 'CC BY-NC-ND', 'CC BY-NC-SA', 'CC BY-ND', 'CC BY-SA', 'CC0', 'GPL'];
-        if (!allLicences.includes(source?.licenseShort)) {
-            hit.setLicence('no licence');
+        let license = source?.licenseShort;
+        if (!Array.isArray(license)){
+            license = [license];
         }
-        hit.setVat(source?.vatVisualizable);
-        hit.setYear(source?.citation_date?.substring(0, 4));
-        hit.setHtml(source?.['html-1']);
-        if (this.communicationService.getIsSemantic()){
-            let html = source?.['html-1'];
-            const title = html.substring(
-                html.lastIndexOf('<span class=\"title\">') + 20,
-                html.lastIndexOf('</span>')
-            );
-            const description = html.substring(
-                html.lastIndexOf('<table class=\"desc\">') + 20,
-                html.lastIndexOf('</table>')
-            );
-            const highLightTitle = item?.highlight?.citation_title?.[0];
-            html = html.replace(title, highLightTitle);
-            const highLightDescription = item?.highlight?.description;
-            if (highLightDescription !== undefined) {
-                html = html.replace(description, highLightDescription);
+        license.forEach((l, i) => {
+            const allLicences = ['CC BY', 'CC BY-NC', 'CC BY-NC-ND', 'CC BY-NC-SA', 'CC BY-ND',
+                'CC BY-SA', 'CC0', 'GPL', 'All rights reserved'];
+            if (!allLicences.includes(l)) {
+                license[i] = 'Other';
             }
-            hit.setHtml(html);
+        });
+        hit.setLicence(license);
+        hit.setVat(source?.vatVisualizable);
+        hit.setLongitude(source?.maxLongitude);
+        hit.setLatitude(source?.minLatitude);
+        hit.setYear(source?.citation_date?.substring(0, 4));
+        if (semantic) {
+            const highLightTitle = item?.highlight?.citation_title?.[0];
+            let matchTitle = highLightTitle?.replace(/<em>/g, '');
+            matchTitle = matchTitle?.replace(/<\/em>/g, '');
+            topic = topic?.replace(matchTitle, highLightTitle);
+            hit.setTitle(topic);
+            const highLightDescription = item?.highlight?.description;
+            if (highLightDescription !== undefined && highLightDescription.length > 0) {
+                highLightDescription.forEach(entry => {
+                    const entryCopy = entry;
+                    entry = entry?.replace(/<em>/g, '');
+                    entry = entry?.replace(/<\/em>/g, '');
+                    description.forEach(row => {
+                        row.value = row.value?.replace(entry, entryCopy);
+                    });
+
+                });
+            }
         }
+
         const xml = this.communicationService.xmltoJson(source?.xml)?.elements?.[0]?.elements;
+        const multimediaObjs: Array<any> = [];
         xml.forEach(element => {
-            if (element.name === 'additionalContent') {
-                const multimediaObjs: Array<any> = [];
+            if (element.name === 'linkage') {
                 const text = element.elements[0].text;
                 const differentTypes = [['.mp3', 'sound'], ['.mp4', 'video'],
                     ['.jpg', 'picture'], ['.tiff', 'picture'],
@@ -113,29 +161,24 @@ export class GfbioPreprocessDataService {
                     if (text.includes(types[0])) {
                         const multimediaObj = {
                             type: types[1],
-                            url: this.multimediaFunc(text, types[0])
+                            url: text
                         };
                         multimediaObjs.push(multimediaObj);
                     }
                 });
-                hit.setMultimediaObjs(multimediaObjs);
             }
         });
+        hit.setMultimediaObjs(multimediaObjs);
         return hit;
     }
-    multimediaFunc(text, obj): any {
-        let item;
-        let url = text.match('http(.*)' + obj);
-        url = url[0].split(',');
-        url.forEach(element => {
-            if (element.includes(obj)) {
-                item = element;
-            }
-        });
-        return item;
-    }
+
     getAggregations(jsonObject): Aggregations[] {
-        const titles = ['Data Center', 'Data Type', 'Parameter', 'Taxonomy', 'Type', 'Geographic Region'];
+        const titles = [GfbioPreprocessDataService.dataCenter,
+            GfbioPreprocessDataService.dataType,
+            GfbioPreprocessDataService.parameter,
+            GfbioPreprocessDataService.taxonomy,
+            GfbioPreprocessDataService.type,
+            GfbioPreprocessDataService.geographicRegion];
         const aggregationsJson = jsonObject?.aggregations;
         const values = Object.values(aggregationsJson);
         const keys = Object.keys(aggregationsJson);
@@ -145,6 +188,7 @@ export class GfbioPreprocessDataService {
             const aggregation = new Aggregations();
             aggregation.setName(String(keys[i]));
             aggregation.setTitle(titles[i]);
+            aggregation.setIcon(this.selectIcon(aggregation.getTitle()));
             const buckets: Bucket[] = [];
             // @ts-ignore
             values[i].buckets.forEach(item => {
@@ -163,10 +207,12 @@ export class GfbioPreprocessDataService {
     getOtherFilters(): Array<any> {
         return [
             {
+                icon: 'map',
                 title: 'Visualizable in VAT',
                 parameters: [{label: 'Visualizable in VAT', parameterType: 'vatVisualizable', parameterValue: true, id: 'vatVisualizable'}]
             },
             {
+                icon: 'lock_outline',
                 title: 'Access',
                 parameters: [{
                     label: 'access is restricted', parameterType: 'accessRestricted', parameterValue: true,
@@ -176,6 +222,7 @@ export class GfbioPreprocessDataService {
                 ]
             },
             {
+                icon: 'image',
                 title: 'Multimedia Object',
                 parameters: [{
                     label: 'images, videos, sound files', parameterType: 'parameterFacet', parameterValue: 'Multimedia Object',
@@ -188,6 +235,7 @@ export class GfbioPreprocessDataService {
     getDatePickers(): Array<any> {
         return [
             {
+                icon: 'date_range',
                 title: 'Collection Date',
                 type: 'collection',
                 inputs: [
@@ -196,6 +244,7 @@ export class GfbioPreprocessDataService {
                 ]
             },
             {
+                icon: 'date_range',
                 title: 'Publication Date',
                 type: 'publication',
                 inputs: [
@@ -206,4 +255,40 @@ export class GfbioPreprocessDataService {
         ];
 
     }
+
+    // available icons: https://jossef.github.io/material-design-icons-iconfont/
+    selectIcon(filter): string {
+
+        // default icon
+        let icon = 'filter_list';
+        switch (filter) {
+            case GfbioPreprocessDataService.dataCenter: {
+                icon = 'storage';
+                break;
+            }
+            case GfbioPreprocessDataService.dataType: {
+                icon = 'domain';
+                break;
+            }
+            case GfbioPreprocessDataService.geographicRegion: {
+                icon = 'location_on';
+                break;
+            }
+            case GfbioPreprocessDataService.taxonomy: {
+                icon = 'account_tree';
+                break;
+            }
+            case GfbioPreprocessDataService.parameter: {
+                icon = 'table_view';
+                break;
+            }
+            case GfbioPreprocessDataService.type: {
+                icon = 'auto_awesome_motion';
+                break;
+            }
+        }
+        return icon;
+    }
+
+
 }

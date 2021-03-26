@@ -1,7 +1,7 @@
-import {Component, OnInit} from '@angular/core';
-import {CommunicationService} from '../services/local/communication.service';
-import {Result} from '../models/gfbio/result';
-import {Citation} from '../models/gfbio/citation';
+import {Component, Inject, OnInit} from '@angular/core';
+import {Citation} from '../models/result/citation';
+import {MAT_DIALOG_DATA} from '@angular/material/dialog';
+import {Hit} from '../models/result/hit';
 @Component({
     selector: 'app-citation',
     templateUrl: './citation.component.html',
@@ -10,17 +10,9 @@ import {Citation} from '../models/gfbio/citation';
 export class CitationComponent implements OnInit {
     result: Citation;
 
-    constructor(private communicationService: CommunicationService) {
+    constructor(@Inject(MAT_DIALOG_DATA) public data: Hit) {
     }
     ngOnInit(): void {
-        let results: Result;
-        this.communicationService.getResult().subscribe(value => {
-            results = value;
-        });
-        this.communicationService.getCitation().subscribe(value => {
-            if (results !== undefined) {
-                this.result = results.getHits()[value].getCitation();
-            }
-        });
+        this.result = this.data.getCitation();
     }
 }

@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {BehaviorSubject, Observable} from 'rxjs';
-import {Result} from '../../models/gfbio/result';
+import {Result} from '../../models/result/result';
 
 
 @Injectable({

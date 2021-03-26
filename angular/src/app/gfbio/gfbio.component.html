@@ -2,14 +2,13 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-3">
-                <app-filters></app-filters>
+                <app-filters [result]="result" (filters)="filterSubmitted($event)" [resetFilters]="resetFilters"></app-filters>
             </div>
             <div class="col-md-9">
-                <app-search-input></app-search-input>
-                <div class="mt-3">
-                    <app-pagination></app-pagination>
+                <app-search-input [checkBoxValues]="basketValues" (basketChecked)="basketChecked()" (searchKeyEmmit)="searchKeySubmitted($event)"></app-search-input>
+                <div class="mt-4">
+                    <app-search-result [result]="result" (basket)="checkBox($event)" (from)="paginationClicked($event)"></app-search-result>
                 </div>
-                <app-search-result></app-search-result>
             </div>
         </div>
     </div>

@@ -29,38 +29,15 @@ export class FilterDatePickerComponent implements OnInit {
                     const key = Object.keys(Object.values(this.filters[i].range)[0])[0];
                     if (key === 'gte'){
                         this.start = new Date(value);
+                        this.startFormat = new Date(value);
                     }
                     if (key === 'lte'){
                         this.end = new Date(value);
+                        this.endFormat = new Date(value);
                     }
                 }
             });
         }
-        // this.filterValues.forEach((filter) => {
-        //     this.datePicker.inputs.forEach((input) => {
-        //         if (filter === input.name) {
-        //             const relatedFilter = this.filters[]
-        //         }
-        //     });
-        //     const type = value.split(' ')[0].toLowerCase();
-        //     if (this.datePicker.type === type) {
-        //         this.start = true;
-        //     }
-        // });
-        // this.communicationService.getRemovedFilter().subscribe(filter => {
-        //     if (filter !== undefined) {
-        //         filter.forEach((value) => {
-        //             if (value === this.datePicker.inputs[0].name) {
-        //                 this.start = undefined;
-        //                 this.startFormat = undefined;
-        //             }
-        //             if (value === this.datePicker.inputs[1].name) {
-        //                 this.end = undefined;
-        //                 this.endFormat = undefined;
-        //             }
-        //         });
-        //     }
-        // });
     }
 
     setDate(dateValue, type): void {

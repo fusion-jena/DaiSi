@@ -6,15 +6,32 @@
                     <span class="ml-2 linkBlue" (click)="onClearAllFilters()">Clear All Filters</span>
                 </div>
                 <div class="my-3">
-                            <span *ngFor="let item of filterValues; let i=index"
-                                  class="badge badge-info mt-1 px-2 mr-1">{{item}}
-                                <span class="removeFilter" (click)="removeFilter(i)">&times;</span>
-                            </span>
+                    <mat-chip-list aria-label="article selection" class="mat-chip-list-stacked">
+                        <div *ngFor="let item of filterValues; let i=index">
+                            <mat-chip [selectable]="false"
+                                      [removable]="true" (removed)="removeFilter(i)" class="h-auto">
+                                {{item}}
+                                <mat-icon matChipRemove>cancel</mat-icon>
+                            </mat-chip>
+                        </div>
+                    </mat-chip-list>
+<!--                            <span *ngFor="let item of filterValues; let i=index"-->
+<!--                                  class="badge badge-info mt-1 px-2 mr-1">{{item}}-->
+<!--                                <span class="removeFilter" (click)="removeFilter(i)">&times;</span>-->
+<!--                            </span>-->
                 </div>
-                <div *ngFor="let item of facets; let i=index">
+                <div *ngFor="let item of result?.getAggregations(); let i=index">
                     <div class="card mb-3">
                         <div class="card-header">
-                            {{item.getTitle()}}
+							<div class="row">
+							    <div class="col-1 col-md-1">
+							      <mat-icon class="filterIcon">{{item.getIcon()}}</mat-icon> 
+							    </div>
+							    <div class="col-auto col-md-auto">
+							     {{item.getTitle()}}
+							    </div>
+							  </div>
+					
                         </div>
                         <div class="card-body">
                             <app-filter-box [filters]="item"
@@ -22,10 +39,17 @@
                         </div>
                     </div>
                 </div>
-                <div *ngFor="let item of otherFilters">
+                <div *ngFor="let item of result?.getOtherFilters()">
                     <div class="card mb-3">
                         <div class="card-header">
-                            {{item.title}}
+                          <div class="row">
+							    <div class="col-1 col-md-1">
+							      <mat-icon class="filterIcon">{{item.icon}}</mat-icon> 
+								</div>
+							    <div class="col-auto col-md-auto">
+								{{item.title}} 
+								</div>
+						  </div>
                         </div>
                         <div class="card-body">
                             <app-other-filters [filter]="item.parameters" [filterValues] = "filterValues"
@@ -33,7 +57,7 @@
                         </div>
                     </div>
                 </div>
-                <div *ngFor="let datePicker of datePickers">
+                <div *ngFor="let datePicker of result?.getDatePickers()">
                     <app-filter-date-picker [datePicker]="datePicker" [filters] = "chosenFilter" [filterValues] = "filterValues"
                                             (chosenDate)="applyDate($event,datePicker)"></app-filter-date-picker>
                 </div>

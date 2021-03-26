@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {NodeService} from '../services/remote/node.service';
 import {CommunicationService} from '../services/local/communication.service';
 import {faSearch} from '@fortawesome/free-solid-svg-icons';
@@ -9,51 +9,45 @@ import {StartSearchingService} from '../services/local/start-searching.service';
     templateUrl: './search-input.component.html',
     styleUrls: ['./search-input.component.css']
 })
-export class SearchInputComponent implements OnInit {
+export class SearchInputComponent{
     faSearch = faSearch;
     searchKey: any;
+    @Output() searchKeyEmmit = new EventEmitter<any>();
     result: any;
     windowSuggestion = false;
+    semanticValue: boolean;
+    @Input() checkBoxValues;
+    @Output() basketChecked = new EventEmitter<any>();
 
     constructor(private nodeService: NodeService,
                 private startSearchingService: StartSearchingService,
                 private communicationService: CommunicationService) {
     }
 
-    // the initial results when the page load
-    // subscribe to the value of suggestion window
-    ngOnInit(): any {
-        this.communicationService.setPagination(0);
-        this.communicationService.setIsSemantic(false);
-        this.startSearching('');
-    }
-
     onWindowSuggestKey(value): void{
         if (value !== undefined) {
             (document.getElementById('searchField') as HTMLInputElement).value = value;
-            this.startSearching(value);
             this.searchKey = value;
+            this.startSearching(this.semanticValue);
             this.windowSuggestion = false;
         }
     }
 
     // by clicking on the submit button, this method will be called
     onSearch(): void {
-        this.communicationService.setIsSemantic(false);
-        this.startSearching(this.searchKey);
+        this.semanticValue = false;
+        this.startSearching(this.semanticValue);
     }
 
     semantic(): void {
-        this.communicationService.setIsSemantic(true);
-        this.startSearching(this.searchKey);
+        this.semanticValue = true;
+        this.startSearching(this.semanticValue);
     }
 
-    // it communicates with the node server to get the result and send it to the search-output
-    startSearching(searchKey): void {
-        this.communicationService.setSearchKey(searchKey);
-        this.communicationService.setIsSearchKey(true);
-        this.communicationService.setPagination(0);
-        this.startSearchingService.startSearching();
+    startSearching(semantic: boolean): void {
+        const keyAndSemantic = [this.searchKey, semantic];
+        this.searchKeyEmmit.emit(keyAndSemantic);
+        // this.communicationService.setIsSearchKey(true);
     }
 
     // by entering a letter on the form, a request will be sent to the node server and then it will be sent to suggestion-window
@@ -62,5 +56,8 @@ export class SearchInputComponent implements OnInit {
             this.communicationService.setSuggest(data.suggest[0].options);
             this.windowSuggestion = true;
         });
+    }
+    basket(): void{
+        this.basketChecked.emit();
     }
 }

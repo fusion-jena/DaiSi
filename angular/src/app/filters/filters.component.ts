@@ -1,39 +1,25 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
 import {CommunicationService} from '../services/local/communication.service';
-import {StartSearchingService} from '../services/local/start-searching.service';
-import {Aggregations} from '../models/gfbio/aggregations';
+import {Aggregations} from '../models/result/aggregations';
+import {Result} from '../models/result/result';
 
 @Component({
     selector: 'app-filters',
     templateUrl: './filters.component.html',
     styleUrls: ['./filters.component.css']
 })
-export class FiltersComponent implements OnInit {
-
-    facets: Array<Aggregations>;
-    otherFilters: Array<any> = [];
+export class FiltersComponent implements OnChanges {
+    @Input() result: Result;
     chosenFilter: Array<object> = [];
     filterValues: Array<string> = [];
-    datePickers: Array<object> = [];
-
-    constructor(private communicationService: CommunicationService,
-                private startSearchingService: StartSearchingService) {
+    @Output() filters = new EventEmitter<any>();
+    @Input() resetFilters: boolean;
+    constructor(private communicationService: CommunicationService) {
     }
-
-    // it listens to the result that will come from the communication service (search-input) to change the results on the screen
-    ngOnInit(): void {
-        this.communicationService.getResult().subscribe(value => {
-            if (value !== undefined) {
-                this.facets = value.getAggregations();
-                this.otherFilters = value.getOtherFilters();
-                this.datePickers = value.getDatePickers();
-            }
-        });
-        this.communicationService.getIsSearchKey().subscribe(value => {
-            if (value === true) {
-                this.clearAllFilters();
-            }
-        });
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes?.resetFilters?.currentValue === true){
+            this.clearAllFilters();
+        }
     }
 
     sendFilter(keyAndFacet): void {
@@ -66,10 +52,9 @@ export class FiltersComponent implements OnInit {
     }
 
     startSearching(): void {
+        this.filters.emit(this.chosenFilter);
         console.log(this.chosenFilter);
         console.log(this.filterValues);
-        this.communicationService.setPagination(0);
-        this.startSearchingService.startSearching();
     }
 
     removeFilter(i): void {

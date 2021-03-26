@@ -1,7 +1,7 @@
 import {Component, Input, OnInit, Output} from '@angular/core';
 import {CommunicationService} from '../services/local/communication.service';
 import {EventEmitter} from '@angular/core';
-import {Aggregations} from '../models/gfbio/aggregations';
+import {Aggregations} from '../models/result/aggregations';
 
 
 @Component({

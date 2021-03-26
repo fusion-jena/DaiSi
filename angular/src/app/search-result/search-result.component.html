@@ -1,58 +1,16 @@
 <div>
-    <div *ngIf="semantic">
-        <span>keys : </span>
-        <span *ngFor="let item of result.getSemanticKeys()" class="highlightedKey">{{item}}</span>
+    <div *ngIf="result?.getHits()?.length!== 0">
+        <app-pagination [result]="result" (paginationClicked)="paginationClicked($event)"></app-pagination>
+    </div>
+    <div *ngIf="result?.getHits()?.length=== 0" class="text-danger">No entries found</div>
+    <div *ngIf="result?.getSemanticKeys()!== undefined">
+        <span>Expanded terms: </span>
+        <span *ngFor="let item of result?.getSemanticKeys()" class="highlightedKey" matTooltip="related term obtained from GFBio's Terminology Service" matTooltipClass="result-item-tooltip">{{item}}</span>
     </div>
     <ngx-spinner></ngx-spinner>
-    <div *ngIf="result.getHits()?.length!==0">
-        <div *ngFor="let item of result.getHits(); let i=index" class="pt-1">
-            <div class="my-2">
-                <span class="labeling bg-label-blue" *ngIf="item.getYear()!== undefined">{{ item.getYear()}}</span>
-                <span class="labeling bg-goldenrod" *ngIf="item.getDataCentre()!== ''">{{ item.getDataCentre()}}</span>
-                <span class="labeling bg-label-green" *ngIf="!item.getAccessType()">Open Access</span>
-            </div>
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-md-11 line-bottom pl-0 pb-3">
-                        <div *ngIf="item.getHtml() !== undefined">
-                            <div [innerHTML]="item.getHtml()"></div>
-                        </div>
-                        <div *ngIf="item.getHtml() === undefined">
-                            <div>{{item.getTitle()}}</div>
-                            <div>{{item.getDescription()}}</div>
-                        </div>
-                        <div class="mt-2">
-                            <img *ngIf="item.getLicence() !== 'no licence'" src="assets/img/{{item.getLicence()+ '.png'}}"
-                                 class="license-img" matTooltip="License: {{ item.getLicence() }}"
-                                 matTooltipClass="customTooltip">
-                            <span *ngIf="item.getLicence() === 'no licence'"><svg width="2em" height="2em" viewBox="0 0 16 16"
-                                                                           class="bi bi-award" fill="currentColor"
-                                                                           xmlns="http://www.w3.org/2000/svg">
-  <path fill-rule="evenodd"
-        d="M9.669.864L8 0 6.331.864l-1.858.282-.842 1.68-1.337 1.32L2.6 6l-.306 1.854 1.337 1.32.842 1.68 1.858.282L8 12l1.669-.864 1.858-.282.842-1.68 1.337-1.32L13.4 6l.306-1.854-1.337-1.32-.842-1.68L9.669.864zm1.196 1.193l-1.51-.229L8 1.126l-1.355.702-1.51.229-.684 1.365-1.086 1.072L3.614 6l-.25 1.506 1.087 1.072.684 1.365 1.51.229L8 10.874l1.356-.702 1.509-.229.684-1.365 1.086-1.072L12.387 6l.248-1.506-1.086-1.072-.684-1.365z"/>
-  <path d="M4 11.794V16l4-1 4 1v-4.206l-2.018.306L8 13.126 6.018 12.1 4 11.794z"/>
-</svg></span>
-                            <img *ngIf="item.getVat()" src="assets/img/vat.png" class="vat-img ml-2"
-                                 matTooltip="This dataset is visualizable in VAT" matTooltipClass="customTooltip">
-                            <span (click)="openDialog(i)" class="citation"><span><fa-icon class="fa-sm"
-                                                                                          [icon]="faQuoteLeft"></fa-icon></span> Citation </span>
-                            <span *ngFor="let obj of item.getMultimediaObjs()" class="ml-3 vertical-middle">
-                                <a *ngIf="obj.type === 'sound'" [href]="sanitize(obj.url)" target="_blank" matTooltip="this item contains a sound file" matTooltipClass="customTooltip"><fa-icon
-                                        class="fa-2x" [icon]="faVolumeUp"></fa-icon></a>
-                            <a *ngIf="obj.type === 'video'" [href]="sanitize(obj.url)" target="_blank" matTooltip="this item contains a video" matTooltipClass="customTooltip"><fa-icon
-                                    class="fa-2x" [icon]="faVideo"></fa-icon></a>
-                            <a *ngIf="obj.type === 'picture'" [href]="sanitize(obj.url)" target="_blank" matTooltip="this item contains a picture" matTooltipClass="customTooltip"><fa-icon
-                                    class="fa-2x" [icon]="faImage"></fa-icon></a>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="col-md-1">
-                        <div class="form-group form-check">
-                            <input type="checkbox" class="regular-checkbox big-checkbox"/>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div *ngIf="result?.getHits()?.length!==0">
+        <div *ngFor="let item of result?.getHits(); let i=index" class="pt-1">
+            <app-result-item [item]="item" [itemId]="i" (checkBoxItem)="checkBox($event)"></app-result-item>
         </div>
     </div>
 </div>

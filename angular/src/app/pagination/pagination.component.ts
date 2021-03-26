@@ -1,32 +1,31 @@
-import {Component, OnInit} from '@angular/core';
-import {CommunicationService} from '../services/local/communication.service';
-import {StartSearchingService} from '../services/local/start-searching.service';
+import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
+import {Result} from '../models/result/result';
 
 @Component({
     selector: 'app-pagination',
     templateUrl: './pagination.component.html',
     styleUrls: ['./pagination.component.css']
 })
-export class PaginationComponent implements OnInit {
+export class PaginationComponent implements OnChanges {
+    @Input() result!: Result;
+    @Output() paginationClicked = new EventEmitter<any>();
     items = [];
     pageOfItems: Array<any>;
     counter = 2;
     entries = 0;
     isSend = false;
 
-    constructor(private startSearchingService: StartSearchingService,
-                private communicationService: CommunicationService) {
+    constructor() {
     }
-
-    ngOnInit(): void {
-        this.communicationService.getResult().subscribe(value => {
-            if (value !== undefined && this.entries !== value.getTotalNumber()) {
-                this.items = Array(value.getTotalNumber()).fill(0);
-                this.entries = value.getTotalNumber();
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes?.result?.currentValue?.getTotalNumber() !== changes?.result?.previousValue?.getTotalNumber()){
+            if (!isNaN(changes?.result?.currentValue?.getTotalNumber())){
+                console.log(changes?.result?.currentValue?.getTotalNumber());
+                this.items = Array(changes?.result?.currentValue?.getTotalNumber()).fill(0);
+                this.entries = changes?.result?.currentValue?.getTotalNumber();
             }
-        });
+        }
     }
-
     onChangePage(pageOfItems: Array<any>): void {
         // update current page of items
         this.pageOfItems = pageOfItems;
@@ -34,13 +33,8 @@ export class PaginationComponent implements OnInit {
             const elements = document.querySelector('.pagination .active');
             const index = Number((elements as HTMLElement).innerText);
             const from = (index - 1) * 10;
-            this.startSearching(from);
+            this.paginationClicked.emit(from);
             this.isSend = false;
         }
-    }
-
-    startSearching(from): void {
-        this.communicationService.setPagination(from);
-        this.startSearchingService.startSearching();
     }
 }

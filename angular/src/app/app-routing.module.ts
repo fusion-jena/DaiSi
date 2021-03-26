@@ -3,7 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 import {GfbioComponent} from './gfbio/gfbio.component';
 
 const routes: Routes = [
-  { path: '', component: GfbioComponent },
+  { path: '', component: GfbioComponent }
 ];
 
 @NgModule({

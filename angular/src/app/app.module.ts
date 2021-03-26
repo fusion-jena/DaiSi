@@ -1,4 +1,4 @@
-import {BrowserModule} from '@angular/platform-browser';
+import {BrowserModule, Title} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 
 import {AppRoutingModule} from './app-routing.module';
@@ -16,16 +16,14 @@ import {JwPaginationModule} from 'jw-angular-pagination';
 import {NgxSpinnerModule} from 'ngx-spinner';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {CitationComponent} from './citation/citation.component';
-import {MatDialogModule} from '@angular/material/dialog';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import {MatDatepickerModule} from '@angular/material/datepicker';
-import {MatNativeDateModule} from '@angular/material/core';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
 import {FiltersComponent} from './filters/filters.component';
 import {OtherFiltersComponent} from './other-filters/other-filters.component';
 import 'reflect-metadata';
 import {FilterDatePickerComponent} from './filter-date-picker/filter-date-picker.component';
+import {MaterialModule} from './material-module';
+import { BasketDialogComponent } from './basket-dialog/basket-dialog.component';
+import { ResultItemComponent } from './search-result/result-item/result-item.component';
+import { DescriptionComponent } from './search-result/description/description.component';
 
 @NgModule({
     declarations: [
@@ -39,8 +37,10 @@ import {FilterDatePickerComponent} from './filter-date-picker/filter-date-picker
         CitationComponent,
         FiltersComponent,
         OtherFiltersComponent,
-        FilterDatePickerComponent
-      
+        FilterDatePickerComponent,
+        BasketDialogComponent,
+        ResultItemComponent,
+        DescriptionComponent
     ],
     imports: [
         BrowserModule,
@@ -51,15 +51,10 @@ import {FilterDatePickerComponent} from './filter-date-picker/filter-date-picker
         JwPaginationModule,
         NgxSpinnerModule,
         BrowserAnimationsModule,
-        MatDialogModule,
-        MatTooltipModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        MatFormFieldModule,
-        MatInputModule,
-        ReactiveFormsModule
+        ReactiveFormsModule,
+        MaterialModule
     ],
-    providers: [MatDatepickerModule, MatNativeDateModule],
+    providers: [Title],
     bootstrap: [AppComponent]
 })
 export class AppModule {

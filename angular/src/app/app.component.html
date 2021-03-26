@@ -1,8 +1,7 @@
 <div class="position-relative">
     <div class="toolbarMenu">
-        <a routerLink="/" routerLinkActive="toolbarMenuItemActive" class="toolbarMenuItem"
-           [routerLinkActiveOptions]="{exact:true}">gfbio</a>
-       
+            <a *ngFor="let index of indexes" routerLink="{{index.link}}" routerLinkActive="toolbarMenuItemActive" class="toolbarMenuItem"
+               [routerLinkActiveOptions]="{exact:true}">{{index.key}}</a>
     </div>
     <div class="p-3 mt-menu">
         <router-outlet></router-outlet>

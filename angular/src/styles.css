@@ -1,7 +1,35 @@
+/******* Colors ********/
+:root {
+  --lightblue: #3cace4;
+  --darkblue:#335AA3;
+  --white: #ffffff;
+  --grey: #636F6D;
+  --lightgreen: #81B248 ;
+  --orange: rgb(255, 128, 0);
+  --darkgrey: rgb(96, 96, 96);
+
+}
+
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body { margin: 0; font-family: 'Lato',sans-serif; color: var(--grey);}
 .customTooltip{
     font-size: 15px!important;
+}
+
+a{
+	color:var(--lightblue);
+}
+a:hover{
+	color:var(--darkblue);
+}
+
+em{
+    /*background-color: #dbe125;*/
+    display: inline-block;
+    font-style: normal;
+	text-decoration: underline;
+ 	 text-decoration-color:#dbe125;
+    text-decoration-thickness:5px;
 }
 .searchButton{
     border-radius: 5px;
@@ -11,17 +39,25 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     box-shadow: 0px 1px 6px rgb(115, 120, 116);
 }
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .text-gray{
-    color: gray;
+    color: var(--grey);
 }
+
+/******* Aggregation/Facets ********/
 .linkBlue{
-    color: #007bff;
+    color: var(--lightblue);
     cursor: pointer;
 }
+
 .linkBlue:hover{
+	color:var(--darkblue);
     text-decoration: underline;
+}
+
+/****** Pagination *******/
+
+.page-link{
+	color:var(--lightblue);
 }
 .pagination .first-item{
     display: none;
@@ -34,18 +70,17 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 }
 .page-item.active .page-link{
     z-index: 0!important;
+    background-color:var(--lightblue);
+	border-color: var(--lightblue);
 }
-em{
-    background-color: yellow;
-    display: inline-block;
-    font-style: normal;
-}
+
 .modal-button{
     box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
     border-radius: 4px;
     border: none;
 }
 .searchInput {
+    margin-top: 5px;
     border-radius: 5px;
     width: 70%;
     border: none;
@@ -55,11 +90,11 @@ em{
 }
 .removeFilter {
     font-size: 20px;
-    padding-bottom: 6px;
+    padding: 3px;
     cursor: pointer;
     display: inline-block;
     margin-left: 4px;
-    vertical-align: unset;
+    vertical-align: sub;
 }
 .removeFilter:hover{
     color: red;
@@ -72,7 +107,7 @@ em{
     font-size: 12px;
     padding: 3px;
     position: absolute;
-    right: 0
+    right: 0;
 }
 
 .basket {
@@ -81,6 +116,7 @@ em{
     height: 30px;
     display: inline-block;
     margin-left: 10px;
+    cursor: pointer;
 }
 
 .basket-img {
@@ -95,6 +131,8 @@ em{
     top: 6px;
     font-weight: bold;
 }
+
+/*********** Search Result ***********/
 .labeling {
     display: inline-block;
     border-radius: 3px;
@@ -105,13 +143,13 @@ em{
     font-weight: bold;
 }
 .bg-label-blue {
-    background-color: olivedrab;
+    background-color: var(--darkgrey);
 }
 .bg-label-green{
-    background-color: limegreen ;
+    background-color: var(--lightgreen) ;
 }
 .bg-goldenrod{
-    background-color: lightseagreen;
+    background-color: var(--orange);
 }
 .regular-checkbox {
     -webkit-appearance: none;
@@ -142,9 +180,11 @@ em{
     color: #99a1a7;
 }
 .big-checkbox {
-    padding: 12px;
+    padding: 12px!important;
 }
-
+.big-checkbox:hover{
+    cursor: pointer;
+}
 .big-checkbox:checked:after {
     font-size: 39px;
     left: 2px;
@@ -154,19 +194,36 @@ em{
 }
 .license-img{
     width: 70px;
+    
 }
 .vat-img{
-    width: 55px;
+	
+    width: 60px;
 }
-.citation{
-    margin-left: 20px;
+
+.result-item-grey{
+    color: var(--grey);
+    font-size: 0.9em;
+}
+.result-item-blue{
     cursor: pointer;
-    color: #007bff;
+    color: var(--lightblue);
+
 }
-.citation:hover{
+.result-item-blue:hover{
     text-decoration: underline;
-    color: #0056b3;
+    color: var(--darkblue);
+  
 }
+
+.pr-2{
+	font-size: 0.9em;
+}
+
+.result-item-tooltip{
+    font-size: 0.75em;
+}
+
 .highlightedKey{
     background-color: #dbe125;
     padding: 4px;
@@ -187,7 +244,7 @@ em{
 }
 .windowBox{
     border: 1px solid gainsboro;
-    width: 70%;
+    width: 100%;
     position: relative;
 }
 .transparentWindow{
@@ -237,7 +294,49 @@ em{
 .toolbarMenuItemActive{
     background-color: rgba(0, 0, 0, 0.3);
 }
+.overFlowText{
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 200px;
+}
+.showLess{
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 400px;
+}
 
+/**** Buttons ****/
 
+/**** Checkbox ****/
+input{
+	margin:5px;
+}
 
+/**** Filters/Aggregations ***/
+.filterIcon{
+	color:#666;
+	font-size: large;
+	padding-top: 0.15em;
+}
 
+.card-header{
+	padding: 0.25em 0.5em;
+}
+
+.card-body{
+	padding: 0.5em;
+}
+
+.mat-form-field-wrapper {
+    padding-bottom: 0.75em;
+}
+
+.col-md-auto-apply {
+    flex: 0 0 auto;
+    width: auto;
+    max-width: 100%;
+    padding-top: 1em;
+    padding-left: 2em;
+}

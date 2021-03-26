@@ -1,26 +1,7 @@
 # Dataset Search - Angular (Frontend)
 
-The Angular frontend serves as user interface of the "Dataset Search UI" application.
+The Angular frontend serves as user interface of the <Dataset Search UI> application.
 
-## Components
-
-The UI consists of multiple components that communicate with each other via internal services.
-
-#### Search Input
-
-#### Search Result
-
-#### Filters
-
-#### Paging
-
-#### Suggestion 
-
-#### Citation
-
-#### Services
-
-* local and remote services
 
 ## CSS adaptions
 
@@ -55,4 +36,4 @@ Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protrac
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
 
 ## License
-"Dataset Search UI" is distributed under the terms of the GNU LGPL v3.0. (https://www.gnu.org/licenses/lgpl-3.0.en.html) 
+<Dataset Search UI> is distributed under the terms of the GNU LGPL v3.0. (https://www.gnu.org/licenses/lgpl-3.0.en.html) 
