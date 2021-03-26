@@ -27,11 +27,13 @@ Please report bugs and issues in the GitHub issue tracker.
 ## Changelog
 
 26.03.2021 first official release 0.2
-	* color and css revised
-	* additional information on demand (mouseover) added
-	* components revised for more modular structure
-	* bugfix semantic search - expanded terms highlighted in title and description
-	* collapse/expand for longer descriptions and parameters
+
+* color and css revised
+* additional information on demand (mouseover) added
+* components revised for more modular structure
+* bugfix semantic search - expanded terms highlighted in title and description
+* collapse/expand for longer descriptions and parameters
+
 05.03.2021 initial release 0.1
 
 ## License
