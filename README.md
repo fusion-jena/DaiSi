@@ -1,4 +1,4 @@
-# [Dai:Si] - A User Interface for Dataset Search
+# [Dai:Si] - A modular framework for Dataset Search
 
 This repository provides the source code for 'Dai:Si' - an application that provides a user interface for querying a dataset search index. 
 It consists of two parts: a backend server (Node Server) and a frontend (Angular application). 
