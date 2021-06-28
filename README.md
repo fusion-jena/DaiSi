@@ -12,7 +12,7 @@ The Node middleware server handles the index requests and provides a convinent A
 
 ## Demo
 
-A live demo is available here: https://dev.gfbio.uni-jena.de/search-ui/
+A live demo is available here: https://dev.gfbio.uni-jena.de/daisi/
 
 The Node Server and its API is also available: https://dev.gfbio.uni-jena.de/search-api/api-docs/
 
