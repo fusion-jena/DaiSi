@@ -76,4 +76,4 @@ Please report bugs and issues in the GitHub issue tracker.
 05.03.2021 initial release 0.1
 
 ## License
-"Dai:Si" is distributed under the terms of the GNU LGPL v3.0. (https://www.gnu.org/licenses/lgpl-3.0.en.html) 
+[Dai:Si] is distributed under the terms of the GNU LGPL v3.0. (https://www.gnu.org/licenses/lgpl-3.0.en.html) 
