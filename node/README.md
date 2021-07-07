@@ -37,4 +37,4 @@ Change the port in the app.js file
 
 
 ## License
-"Dai:Si" is distributed under the terms of the GNU LGPL v3.0. (https://www.gnu.org/licenses/lgpl-3.0.en.html) 
+[Dai:Si] is distributed under the terms of the GNU LGPL v3.0. (https://www.gnu.org/licenses/lgpl-3.0.en.html) 
