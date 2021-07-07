@@ -18,8 +18,6 @@ The Node Server and its API is also available: https://dev.gfbio.uni-jena.de/dai
 
 ## How to setup Dataset Search UI for an own index
 
-## Adding new index
-
 Please follow the instructions below if you want to use [Dai:Si] for your own search index. Make sure that your index is available 
 
 1. Create a new component for your index
