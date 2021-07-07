@@ -2,7 +2,7 @@
 
 This repository provides the source code for 'Dai:Si' - a frontend framework for querying a dataset search index. The name is an abbrevation of 'Dataset Search' in its phonetic spelling.
 Dai:Si consists of two parts: a backend server (Node Server) and a frontend (Angular application). 
-The Node middleware server handles the index requests and provides a convenient API for the frontend - a modular Angular app that can be easily adjusted for a specific domain. 
+The Node middleware server handles the index requests and provides a convenient API for the frontend - a modular Angular app that can be easily adjusted for a specific domain. Dai:Si also provides a semantic search for biological datasets. 
 
 * [Angular app] 
 * [Node Server] 
@@ -18,7 +18,41 @@ The Node Server and its API is also available: https://dev.gfbio.uni-jena.de/dai
 
 ## How to setup Dataset Search UI for an own index
 
-TBD
+## Adding new index
+
+Please follow the instructions below if you want to use [Dai:Si] for your own search index. Make sure that your index is available 
+
+1. Create a new component for your index
+2. Go to `app.component.ts` and add a new entry to the array of 'indexes' with a title and a URL (e.g., 'myNewIndex', '/myNewIndex' ).
+3. Go to the `app-routing.module.ts`, import your newly created component and add an entry to the routes array, e.g.,
+
+``const routes: Routes = [
+  { path: '', component: GfbioComponent },
+  { path: '/myNewIndex', component: MyNewIndex }
+];
+``
+
+4. Go to the html file of the component that you created and add the components you want to use. For instance, if you need the search-result component, which displays a search result and also includes pagination, you should add
+
+``<app-search-result [result]="result" (basket)="checkBox($event)" (from)="paginationClicked($event)"></app-search-result>``
+
+5. Then go to the `*.ts` file and implement from "SearchResult"(example:go to the `gfbio.component.ts`). You need to pass the content information through the "result" parameter (subscribed to the `communicationService.getResult()`). If a user clicks on an entry in the pagination component, you can get the click's action and the page number from the "paginationClicked" function. If the user clicks a check box in the results, you can get the click's action and the checked results, from "checkBox" function. If you need the filters component, you need to add the 
+
+``<app-filters [result]="result" (filters)="filterSubmitted($event)" [resetFilters]="resetFilters"></app-filters>``
+
+Again you need to pass the results through a "result" parameter. If you need to clean the filters (example: new search key) by an action, 
+you need to pass it by `resetFilters= true`. You can get the clicked filters by the "filterSubmitted" function.
+
+If you need the search-input component, add 
+
+``<app-search-input [checkBoxValues]="basketValues" (basketChecked)="basketChecked()" (searchKeyEmmit)="searchKeySubmitted($event)"></app-search-input>``
+
+You can add the elements that you want to put into the basket by `basketValues`. If the user clicks on the basket, the action can be received by the `basketChecked` function. If the user clicks on one of the search buttons (search, semantic), the action can be received by the `searchKeySubmitted` function. The input of the function is an array. The first item is the search key and the second one is a boolean value and represents if the search is semantic or not. Now you have all the information you need for sending the http request (such as search keys, filters, pagination, ...) - we are ready to send the request.
+
+6. To send a request, you need a service which is responsible to map the results of the http request to the result object which is used in the search-result component to show the information. Create a new service under the services/local directory (example: `gfbio-preprocess-data.service.ts`). Go to the component that you want to send the request and inject the service in the constructor, e.g., "NodeService".
+
+7. When calling the "search" method in the "NodeService", you need to pass 4 parameters (urlTerm, body, the service for mapping the result, parameters that you need in the mapping service). Check the example in the `Start-searching.Service.ts`.
+
 
 ## Issue Tracking
 
