@@ -21,7 +21,7 @@ Create a file named
 
 ```.env```
 
-in your root folder and add the environment variables for API_HOST and HOST and further index specific URLs according your local settings. We provide an '.envExample' file as explanation.
+in your root folder and add the environment variables for API_HOST and HOST and further index specific URLs according to your local settings. We provide an '.envExample' file as explanation.
 
 If there are no conflicts, start the server with
 
