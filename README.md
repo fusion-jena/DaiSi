@@ -1,8 +1,8 @@
 # [Dai:Si] - A modular framework for Dataset Search
 
 This repository provides the source code for 'Dai:Si' - a frontend framework for querying a dataset search index. The name is an abbrevation of 'Dataset Search' in its phonetic spelling.
-Dai:Si consists of two parts: a backend server (Node Server) and a frontend (Angular application). 
-The Node middleware server handles the index requests and provides a convenient API for the frontend - a modular Angular app that can be easily adjusted for a specific domain. Dai:Si also provides a semantic search for biological datasets. 
+[Dai:Si] consists of two parts: a backend server (Node Server) and a frontend (Angular application). 
+The Node middleware server handles the index requests and provides a convenient API for the frontend - a modular Angular app that can be easily adjusted for a specific domain. [Dai:Si] also provides a semantic search for biological datasets. 
 
 * [Angular app] 
 * [Node Server] 
