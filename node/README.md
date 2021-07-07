@@ -1,4 +1,4 @@
-# Dataset Search - Node Server (Backend)
+# [Dai:Si] - Node Server (Backend)
 
 The Node Server serves as middleware to handle requests from the search index and to provide an API for frontend developers. We provide the code for an elasticsearch index in the scope of the [GFBio project](https://www.gfbio.org).
 
@@ -7,7 +7,7 @@ The Node Server serves as middleware to handle requests from the search index an
 
 ### NodeJS
 You need to install [NodeJS](https://nodejs.org/en/) on your machine. NodeJS requires a [package manager](https://nodejs.org/en/download/package-manager/).
-"Dai:Si" was developed and tested with NodeJS v14.15.4 under Windows 10 and Ubuntu 18.
+[Dai:Si] was developed and tested with NodeJS v14.15.4 under Windows 10 and Ubuntu 18.
 Check your node version with ```node -v```
 
 
