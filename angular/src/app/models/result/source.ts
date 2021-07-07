@@ -1,19 +1,12 @@
-import {Expose} from 'class-transformer';
-
 export class Source {
-    @Expose({name: 'citation_title'})
     private citationTitle: string;
-    @Expose({name: 'html-1'})
     private html: string;
-    @Expose({name: 'citation_publisher'})
     private citationPublisher: string;
     private description: string;
-    @Expose({name: 'citation_date'})
     private citationDate: string;
     private licenseShort: string;
     private xml: string;
     private minLongitude: number;
-    @Expose({name: 'citation_source'})
     private citationSource: string;
     private dataCenter: string;
     private maxLongitude: number;

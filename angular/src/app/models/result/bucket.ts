@@ -1,8 +1,5 @@
-import {Expose} from 'class-transformer';
-
 export class Bucket {
     private key: string;
-    @Expose({name: 'doc_count'})
     private docCount: number;
     private checked = false;
 

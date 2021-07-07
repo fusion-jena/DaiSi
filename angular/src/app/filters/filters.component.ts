@@ -2,6 +2,7 @@ import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges
 import {CommunicationService} from '../services/local/communication.service';
 import {Aggregations} from '../models/result/aggregations';
 import {Result} from '../models/result/result';
+import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
 
 @Component({
     selector: 'app-filters',
@@ -14,7 +15,16 @@ export class FiltersComponent implements OnChanges {
     filterValues: Array<string> = [];
     @Output() filters = new EventEmitter<any>();
     @Input() resetFilters: boolean;
-    constructor(private communicationService: CommunicationService) {
+    openChart = true;
+    constructor(breakpointObserver: BreakpointObserver, private communicationService: CommunicationService) {
+        breakpointObserver.observe([
+            Breakpoints.HandsetLandscape,
+            Breakpoints.HandsetPortrait
+        ]).subscribe(result => {
+            if (result.matches) {
+                this.openChart = false;
+            }
+        });
     }
     ngOnChanges(changes: SimpleChanges): void {
         if (changes?.resetFilters?.currentValue === true){

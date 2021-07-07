@@ -1,8 +1,6 @@
-import {Expose, Type} from 'class-transformer';
-import {Source} from './source';
-import {Highlight} from './highlight';
 import {Citation} from './citation';
 import {Description} from './description';
+import {Linkage} from './linkage';
 
 export class Hit {
     private title;
@@ -16,8 +14,13 @@ export class Hit {
     private multimediaObjs;
     private latitude;
     private longitude;
-    @Type(() => Citation)
-    private citation;
+    private citation: Citation;
+    private linkage;
+    private metadatalink;
+    private identifier;
+    private color;
+    private xml;
+    private checkbox;
 
     getTitle(): string {
         return this.title;
@@ -26,6 +29,47 @@ export class Hit {
     setTitle(title: string): void {
         this.title = title;
     }
+
+    getColor(): string {
+        return this.color;
+    }
+
+    setColor(color: string): void {
+        this.color = color;
+    }
+
+    getMetadatalink(): string {
+        return this.metadatalink;
+    }
+
+    setMetadatalink(metadatalink: string): void {
+        this.metadatalink = metadatalink;
+    }
+
+    getIdentifier(): string {
+        return this.identifier;
+    }
+
+    setIdentifier(identifier: string): void {
+        this.identifier = identifier;
+    }
+
+    getLinkage(): Linkage {
+        return this.linkage;
+    }
+
+    setLinkage(linkage: Linkage): void {
+        this.linkage = linkage;
+    }
+
+    getXml(): string {
+        return this.xml;
+    }
+
+    setXml(xml: string): void {
+        this.xml = xml;
+    }
+
     getTitleUrl(): string {
         return this.titleUrl;
     }
@@ -33,6 +77,7 @@ export class Hit {
     setTitleUrl(titleUrl: string): void {
         this.titleUrl = titleUrl;
     }
+
     getDescription(): Array<Description> {
         return this.description;
     }
@@ -40,6 +85,7 @@ export class Hit {
     setDescription(description: Array<Description>): void {
         this.description = description;
     }
+
     getDataCentre(): string {
         return this.dataCentre;
     }
@@ -47,6 +93,7 @@ export class Hit {
     setDataCentre(dataCentre: string): void {
         this.dataCentre = dataCentre;
     }
+
     getYear(): string {
         return this.year;
     }
@@ -54,6 +101,7 @@ export class Hit {
     setYear(year: string): void {
         this.year = year;
     }
+
     getAccessType(): boolean {
         return this.accessType;
     }
@@ -61,6 +109,7 @@ export class Hit {
     setAccessType(accessType: boolean): void {
         this.accessType = accessType;
     }
+
     getLicence(): Array<string> {
         return this.licence;
     }
@@ -68,6 +117,7 @@ export class Hit {
     setLicence(licence: Array<string>): void {
         this.licence = licence;
     }
+
     getVat(): boolean {
         return this.vat;
     }
@@ -83,6 +133,7 @@ export class Hit {
     setCitation(citation: Citation): void {
         this.citation = citation;
     }
+
     getMultimediaObjs(): Array<any> {
         return this.multimediaObjs;
     }
@@ -90,24 +141,42 @@ export class Hit {
     setMultimediaObjs(multimediaObjs: Array<any>): void {
         this.multimediaObjs = multimediaObjs;
     }
-    
-    getLatitude(): string{
-		return this.latitude;
-	}
-	setLatitude(latitude:string): void{
-		this.latitude = latitude;
-	}
-	getLongitude(): string{
-		return this.longitude;
-	}
-	setLongitude(longitude:string): void{
-		this.longitude = longitude;
-	}
+
+    getLatitude(): string {
+        return this.latitude;
+    }
+
+    setLatitude(latitude: string): void {
+        this.latitude = latitude;
+    }
+
+    getLongitude(): string {
+        return this.longitude;
+    }
+
+    setLongitude(longitude: string): void {
+        this.longitude = longitude;
+    }
+
+    getCheckBox(): boolean {
+        return this.checkbox;
+    }
+
+    setCheckbox(checkbox: boolean): void {
+        this.checkbox = checkbox;
+    }
+
+    coordinates(): string {
+        if (this.getLatitude !== undefined && this.getLongitude() !== undefined) {
+            return 'This dataset has coordinates: min latitude: ' + this.getLatitude() + ', max longitude: ' + this.getLongitude();
+        } else {
+            return 'This dataset has coordinates.';
+        }
+    }
 	
-	coordinates(): string{
-		if(this.getLatitude !== undefined && this.getLongitude() !== undefined)
-			return "This dataset is visualizable: min latitude: "+ this.getLatitude() + ", max longitude: "+ this.getLongitude();
-		else
-			return "This dataset is visualizable."
-	}
+	transferToVat(): string {
+        if (this.getVat()) {
+            return 'This dataset can be transfered to VAT.';
+        }
+    }
 }

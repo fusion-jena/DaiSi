@@ -1,11 +1,19 @@
-# Dataset Search - Angular (Frontend)
+# [Dai:Si] - Angular (Frontend)
 
-The Angular frontend serves as user interface of the <Dataset Search UI> application.
+The Angular frontend serves as user interface of <Dai:Si>.
 
+## Installation and Configuration
 
-## CSS adaptions
+Install all necessary dependencies: Navigate to the angular folder and run
 
-* create a new css file and add it to angular.json under the 'styles.css'. Overwrite all css classes you want to change. 
+```npm install```
+
+The src/environment folder contains two files for local settings and adjustments.
+
+`environment.ts` - environment file for development
+
+`environment.prod.ts` - environment file for production
+
 
 ## General Angular instructions
 
@@ -35,5 +43,9 @@ Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protrac
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
 
+## CSS adaptions
+
+* create a new css file and add it to angular.json under the 'styles.css'. Overwrite all css classes you want to change. 
+
 ## License
-<Dataset Search UI> is distributed under the terms of the GNU LGPL v3.0. (https://www.gnu.org/licenses/lgpl-3.0.en.html) 
+<Dai:Si> is distributed under the terms of the GNU LGPL v3.0. (https://www.gnu.org/licenses/lgpl-3.0.en.html) 

@@ -2,170 +2,174 @@ var express = require('express');
 var app = express();
 var router = require('express').Router();
 var bodyParser = require('body-parser').json();
-const axios = require('axios'); //http calls
+const axios = require('axios');
+const Blob = require('node-blob');
+var FileSaver = require('file-saver');
+var fs = require("fs");
+var JSZip = require("jszip");
 
 // module to establish a connection to Elasticsearch
 // currently not needed
 //var search = require('./connectionElastic');
 
-var GFBioTS_URL = "http://terminologies.gfbio.org/api/terminologies/";
-var PANGAEA_URL = "http://ws.pangaea.de/es/dataportal-gfbio/_search";
-
+var GFBioTS_URL = process.env.GFBIOTS_URL;
+var Pangaea_URL = process.env.PANGAEA_URL;
+var Pangaea_Suggest_URL = process.env.PANGAEA_SUGGEST_URL;
 // Sets up the routes.  
-  /********************** GFBIO code *******************/
-  /**
-  * POST /gfbio/search
-  * Search for a term 
-  */
-  /**
-   * @swagger
-   * /gfbio/search:
-   *   post:
-   *     description: Returns search results
-   *     tags: [Search GFBio - Elastic index]
-   *     summary: returns a search result
-   *     consumes:
-   *       - application/json
-   *     parameters:
-   *       - in: body
-   *         name: queryterm
-   *         description: the query as string
-   *         schema:
-   *            type: object
-   *            required:
-   *              - queryterm
-   *            properties:
-   *              queryterm:
-   *                type: string
-   *                example: fungi
-   *              from:
-   *                type: integer
-   *                description: from which page to start?
-   *                example: 0
-   *              size:
-   *                type: integer
-   *                description: how many datasets to return per page?
-   *                example: 10
-   *     responses:
-   *       201:
-   *         description: hits.hits contains an array with dataset objects matching the query.
-   */
+/********************** GFBIO code *******************/
+/**
+ * POST /gfbio/search
+ * Search for a term
+ */
+/**
+ * @swagger
+ * /gfbio/search:
+ *   post:
+ *     description: Returns search results
+ *     tags: [Search GFBio - Elastic index]
+ *     summary: returns a search result
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: queryterm
+ *         description: the query as string
+ *         schema:
+ *            type: object
+ *            required:
+ *              - queryterm
+ *            properties:
+ *              queryterm:
+ *                type: string
+ *                example: fungi
+ *              from:
+ *                type: integer
+ *                description: from which page to start?
+ *                example: 0
+ *              size:
+ *                type: integer
+ *                description: how many datasets to return per page?
+ *                example: 10
+ *     responses:
+ *       201:
+ *         description: hits.hits contains an array with dataset objects matching the query.
+ */
 router.post('/search', (req, res) => {
-	
-		 //in case you want to use the elasticmodule
-		 /*search.sendQuery(req.body).then(resp=>{
-			
-			return res.status(200).send(resp);
-			
-		})
-		.catch(err=>{
-			console.log(err);
-			return res.status(500).json({
-				msg:'Error', err
-			});
-		});*/
-		
-		/* we utilize axios for calling elasticsearch
-		* a request should like this
-		* {"queryterm":"quercus","from":0,"size":10,"filter":[]}
-		*/
-		
-		
-		//get the keyword from the body
-		const keyword = req.body.queryterm;
 
-		 let filter = [];
-		 let from = 0;
-		 let size = 0;
+    //in case you want to use the elasticmodule
+    /*search.sendQuery(req.body).then(resp=>{
 
-		// get from, size and filters from the body
-		if (req.body.from !== 'undefined' && req.body.from >= 0) {
-			from = req.body.from
-		}
+       return res.status(200).send(resp);
 
-		if (req.body.size !== 'undefined' && req.body.size >= 0) {
-			size = req.body.size
-		}
+   })
+   .catch(err=>{
+       console.log(err);
+       return res.status(500).json({
+           msg:'Error', err
+       });
+   });*/
 
-		if (req.body.filter !== 'undefined') {
-			filter = req.body.filter
-		}
+    /* we utilize axios for calling elasticsearch
+    * a request should like this
+    * {"queryterm":"quercus","from":0,"size":10,"filter":[]}
+    */
 
-		//get the filtered query
-		const filteredQuery = getFilteredQuery(keyword, filter);
-        console.log(filteredQuery);
-		
-		//apply the boost
-		const boostedQuery = applyBoost(filteredQuery);
-		
-		//construct the complete query with from and size
-		const data = getCompleteQuery(boostedQuery, from, size);
-		
-		//config the header, we only accept json data
-		const config = {
-			headers: {
-				'Content-Type': 'application/json'
-			}
-		}
-		//post it to GFBio elasticsearch index
-	   return axios.post(PANGAEA_URL, data, config).then(resp=>{
-			
-			// if you receive data - send it back
-			res.status(200).send(resp.data);
-			
-		})
-		.catch(err=>{
-			//in error case - log it and send the error
-			console.log(err);
-			return res.status(500).json({
-				msg:'Error', err
-			});
-		});
-		
-	
-    });
+
+    //get the keyword from the body
+    const keyword = req.body.queryterm;
+
+    let filter = [];
+    let from = 0;
+    let size = 0;
+
+    // get from, size and filters from the body
+    if (req.body.from !== 'undefined' && req.body.from >= 0) {
+        from = req.body.from
+    }
+
+    if (req.body.size !== 'undefined' && req.body.size >= 0) {
+        size = req.body.size
+    }
+
+    if (req.body.filter !== 'undefined') {
+        filter = req.body.filter
+    }
+
+    //get the filtered query
+    const filteredQuery = getFilteredQuery(keyword, filter);
+    
+
+    //apply the boost
+    const boostedQuery = applyBoost(filteredQuery);
+
+    //construct the complete query with from and size
+    const data = getCompleteQuery(boostedQuery, from, size);
+	console.log(JSON.stringify(data));
+    //config the header, we only accept json data
+    const config = {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }
+    //post it to GFBio elasticsearch index
+    return axios.post(Pangaea_URL, data, config).then(resp => {
+
+        // if you receive data - send it back
+        res.status(200).send(resp.data);
+
+    })
+        .catch(err => {
+            //in error case - log it and send the error
+            console.log(err);
+            return res.status(500).json({
+                msg: 'Error', err
+            });
+        });
+
+
+});
 
 /**
  * POST /suggest
  * Suggest service
  */
- /**
-   * @swagger
-   * /gfbio/suggest:
-   *   post:
-   *     description: Returns query term suggestions for given characters
-   *     tags: [Search GFBio - Elastic index]
-   *     summary: returns query term suggestions
-   *     consumes:
-   *       - application/json
-   *     parameters:
-   *       - in: body
-   *         name: term
-   *         description: the characters for which suggestions are needed
-   *         schema:
-   *            type: object
-   *            required:
-   *              - term
-   *            properties:
-   *              term:
-   *                type: string
-   *                example: quer
-   *     responses:
-   *       201:
-   *         description: object with key 'suggest' containing an array with options 
-   */
+/**
+ * @swagger
+ * /gfbio/suggest:
+ *   post:
+ *     description: Returns query term suggestions for given characters
+ *     tags: [Search GFBio - Elastic index]
+ *     summary: returns query term suggestions
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: term
+ *         description: the characters for which suggestions are needed
+ *         schema:
+ *            type: object
+ *            required:
+ *              - term
+ *            properties:
+ *              term:
+ *                type: string
+ *                example: quer
+ *     responses:
+ *       201:
+ *         description: object with key 'suggest' containing an array with options
+ */
 router.post('/suggest', (req, res) => {
     //console.log('Body:' + req.body.term);
     //get the term from the body
-	const term = req.body.term
+    const term = req.body.term
 
     //set the header  - only json data permitted
-	const config = {
+    const config = {
         headers: {
             'Content-Type': 'application/json'
         }
     }
-	//specific data object required 
+    //specific data object required
     const data = {
         suggest: {
             text: term,
@@ -176,66 +180,132 @@ router.post('/suggest', (req, res) => {
         }
     }
 
-	//post the request to elasticsearch
-    return axios.post('http://ws.pangaea.de/es/dataportal-gfbio/_suggest', data, config)
-	.then((resp) => {
-        //console.log(`Status: ${resp.status}`);
-        //console.log('Body: ', resp.data);
-  		res.status(200).send(resp.data);
-       
-    })
-    .catch((err)=> {
-		  console.log(err);
-		
-		  return res.status(500).json({
-		  msg:'Error', err
-		  });
-	 });
-    
-})
+    //post the request to elasticsearch
+    return axios.post(Pangaea_Suggest_URL, data, config)
+        .then((resp) => {
+            //console.log(`Status: ${resp.status}`);
+            //console.log('Body: ', resp.data);
+            res.status(200).send(resp.data);
 
+        })
+        .catch((err) => {
+            console.log(err);
+
+            return res.status(500).json({
+                msg: 'Error', err
+            });
+        });
+
+})
+router.post('/basket', (req, res) => {
+    // res.status(200).send(req.body.basket);
+    const selectedBasket = req.body.basket;
+
+    var zip = new JSZip();
+    var axiosArray = [];
+    var names = []
+    selectedBasket.forEach(function (result, index) {
+
+        // metadata
+        var identifier = result['identifier'].replace(/[` ~!@#$%^&*()_|+\-=÷¿?;:'",.<>\{\}\[\]\\\/]/gi, '');
+        zip.file(identifier + "_metadata.xml", result['xml']);
+
+        // data
+        if(result.linkage.data) {
+            names.push("");
+
+            var datalink = decodeURIComponent(result.linkage.data);
+            
+            axiosArray.push(axios.get(datalink, {
+                responseType: 'arraybuffer',
+                headers: { "Content-Type": "text/plain; charset=x-user-defined" }}));
+         }
+
+        // multimedia
+        if(result.linkage.multimedia) {
+            for (var i = 0; i < result.linkage.multimedia.length; i++) {
+                names.push(new URL(result.linkage.multimedia[i].url).pathname.split('/').pop());
+
+                var multimedialink = decodeURIComponent(result.linkage.multimedia[i].url);
+            
+                axiosArray.push(axios.get(multimedialink, {
+                    responseType: 'arraybuffer'
+                }));
+            }
+        }
+    })
+
+    console.log("length of array: "+axiosArray.length);
+
+    axios.all(axiosArray)
+        .then(axios.spread( (...responses) => {
+            for (var i = 0; i < axiosArray.length; i++) {
+                if(responses[i].headers['content-disposition']) {
+                    var regexp = /filename=(.*)/;
+                    zip.file(regexp.exec(responses[i].headers['content-disposition'])[1], Buffer.from(responses[i].data), {base64: false});
+                }else {
+                    zip.file(names[i], Buffer.from(responses[i].data), {base64: false});
+                }
+            }
+
+            var zipName = 'gfbio_basket' + '.zip';
+
+            zip
+                .generateNodeStream({type: 'nodebuffer', streamFiles: true})
+                .pipe(fs.createWriteStream(zipName))
+                .on('finish', function () {
+                    console.log(zipName);
+                    res.status(200).download("./" + zipName, zipName);
+                });
+        })).catch((err) => {
+            console.log(err);
+            return res.status(500).json({
+                msg: 'Error', err
+            });
+        });
+})
 
 /**
  * POST /semantic-search
  * semantic search service (based on query expansion)
  * search query is sent to GFBio TS first, only expanded result is forwarded to elasticsearch
  */
- /**
-   * @swagger
-   * /gfbio/semantic-search:
-   *   post:
-   *     description: search query is sent to GFBio TS first, only expanded result is forwarded to elasticsearch
-   *     tags: [Search GFBio - Elastic index]
-   *     summary: returns search results including semantic related results
-   *     consumes:
-   *       - application/json
-   *     parameters:
-   *       - in: body
-   *         name: queryterm
-   *         description: the query as string array
-   *         schema:
-   *            type: object
-   *            required:
-   *              - queryterm
-   *            properties:
-   *              queryterm:
-   *                type: array
-   *                items: 
-   *                   type: string
-   *                example: [honeybee,grassland]
-   *              from:
-   *                type: integer
-   *                description: from which page to start?
-   *                example: 0
-   *              size:
-   *                type: integer
-   *                description: how many datasets to return per page?
-   *                example: 10
-   *     responses:
-   *       201:
-   *         description: hits.hits contains an array with dataset objects matching the query.
-   */
-router.post('/semantic-search',(req,res) => {
+/**
+ * @swagger
+ * /gfbio/semantic-search:
+ *   post:
+ *     description: search query is sent to GFBio TS first, only expanded result is forwarded to elasticsearch
+ *     tags: [Search GFBio - Elastic index]
+ *     summary: returns search results including semantic related results
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: queryterm
+ *         description: the query as string array
+ *         schema:
+ *            type: object
+ *            required:
+ *              - queryterm
+ *            properties:
+ *              queryterm:
+ *                type: array
+ *                items:
+ *                   type: string
+ *                example: [honeybee,grassland]
+ *              from:
+ *                type: integer
+ *                description: from which page to start?
+ *                example: 0
+ *              size:
+ *                type: integer
+ *                description: how many datasets to return per page?
+ *                example: 10
+ *     responses:
+ *       201:
+ *         description: hits.hits contains an array with dataset objects matching the query.
+ */
+router.post('/semantic-search', (req, res) => {
 
     /*e.g., 
 	* {
@@ -244,91 +314,137 @@ router.post('/semantic-search',(req,res) => {
     * 	"size":10
 	* }
 	*/
-     
-	 //expects keyword as string array
+
+    //expects keyword as string array
     const keywords = req.body.queryterm; //array with keywords
-    
+
     let allKeyWords = keywords;
-	let axiosArray = [];
- 
-	//at first, send each keyword to GFBio TS
-	for ( i = 0; i < keywords.length; i++) {
-		//console.log("keyword: "+keywords[i]);
-		axiosArray.push(axios.get(GFBioTS_URL + "search?query=" + keywords[i] + "&match_type=exact"))
-	}
-	 //collect all calls first and then send it in a bunch
-	 //axios will handle them in parallel and will only continue when all calls are back 
-	 return axios.all(axiosArray)
-	 .then(axios.spread((...responses) => {
-		 for ( i = 0; i < axiosArray.length; i++) {
-			var results = responses[i].data.results;
+    let axiosArray = [];
+
+    //at first, send each keyword to GFBio TS
+    for (i = 0; i < keywords.length; i++) {
+        //console.log("keyword: "+keywords[i]);
+        axiosArray.push(axios.get(GFBioTS_URL + "search?query=" + keywords[i] + "&match_type=exact"))
+    }
+    //collect all calls first and then send it in a bunch
+    //axios will handle them in parallel and will only continue when all calls are back
+    return axios.all(axiosArray)
+        .then(axios.spread((...responses) => {
+            for (i = 0; i < axiosArray.length; i++) {
+                var results = responses[i].data.results;
+				
                 results.forEach(function (item) {
+					var log = "";
+					//console.log(item);
                     for (const [key, value] of Object.entries(item)) {
-                        if (key === 'commonNames') {
-                            allKeyWords = allKeyWords.concat(value)
-                        }
-                        if (key === 'synonyms') {
-                            allKeyWords = allKeyWords.concat(value)
-                        }
+						if (item.sourceTerminology !== 'GEONAMES'){
+							if (key === 'commonNames') {
+							  var keyword = value.toString().replace(/,/g,"\"|\"");
+                              allKeyWords = allKeyWords.concat("\""+keyword+"\"")
+                              log += "----- commonName : " + value+"\n";
+                            }
+                            if (key === 'synonyms') {
+							  var keyword = value.toString().replace(/,/g,"\"|\"");
+                              allKeyWords = allKeyWords.concat("\""+keyword+"\"")
+                              log +="----- synonym : " + value+"\n";
+                            }
+                            if (key === 'label') {
+
+                              allKeyWords = allKeyWords.concat("\""+value+"\"")
+                              log += "----- label : " + value+"\n";
+                            }
+						}
                     }
+					if (log.length>0){
+						console.log("----- sourceTerminology : " + item.sourceTerminology);
+						console.log("----- uri : " + item.uri);
+						console.log(log);
+					}
                 });
-		 }
-		 //console.log(allKeyWords);
-		 allKeyWords = allKeyWords.filter((a, b) => allKeyWords.indexOf(a) === b)
-		
-		 //elastic call
-		 let filter = [];
-		 let from = 0;
-		 let size = 0;
+            }
+            console.log(" ************************** ");
+            allKeyWords = allKeyWords.filter((a, b) => allKeyWords.indexOf(a) === b)
+			var semanticTerms = allKeyWords.join("|");
+			console.log(semanticTerms);
+            //elastic call
+            let filter = [];
+            let from = 0;
+            let size = 0;
 
-		//check if from, size and filters are in the request
-		if (req.body.from !== 'undefined' && req.body.from >= 0) {
-			from = req.body.from
-		}
+            //check if from, size and filters are in the request
+            if (req.body.from !== 'undefined' && req.body.from >= 0) {
+                from = req.body.from
+            }
 
-		if (req.body.size !== 'undefined' && req.body.size >= 0) {
-			size = req.body.size
-		}
+            if (req.body.size !== 'undefined' && req.body.size >= 0) {
+                size = req.body.size
+            }
 
-		if (req.body.filter !== 'undefined') {
-			filter = req.body.filter
-		}
+            if (req.body.filter !== 'undefined') {
+                filter = req.body.filter
+            }
 
-		//get the filtered query
-		const filteredQuery = getBooleanQuery(allKeyWords, filter);
+            //get the filtered query
+            const filteredQuery = getBooleanQuery(allKeyWords, filter);
 
-		//apply the boost
-		const boostedQuery = applyBoost(filteredQuery);
-		
-		//get the complete query 
-		const data = getCompleteQuery(boostedQuery, from, size);
-		
-		//set the header - only json data accepted
-		const config = {
-			headers: {
-				'Content-Type': 'application/json'
-			}
-		}
-	    //console.log(data);
-		
-		//post the expanded query to GFBio elastic index
-		return axios.post(PANGAEA_URL, data, config);
-		
-	 }))
-	 .then(resp=>{
-			//last item is necessary for highlighting the expanded terms
-			resp.data.lastItem = allKeyWords;
-			res.set('Content-Type', 'application/json');
-			res.status(200).send(resp.data);
-			
-	 })
-	 .catch((err)=> {
-			console.log(err);
-			return res.status(500).json({
-				msg:'Error', err
-			});
-	 });
-	
+            //apply the boost
+            const boostedQuery = applyBoost(filteredQuery);
+
+            //get the complete query
+            const data = getCompleteQuery(boostedQuery, from, size);
+
+            //set the header - only json data accepted
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+            //console.log(JSON.stringify(data));
+
+            //post the expanded query to GFBio elastic index
+            return axios.post(Pangaea_URL, data, config);
+
+        }))
+        .then(resp => {
+            //last item is necessary for highlighting the expanded terms
+            //resp.data.lastItem = allKeyWords;
+			var extendedTerms = [];
+			var result = resp.data.hits.hits;
+            for (var i = 0, iLen = result.length; i < iLen; i++) {
+                var highlight = result[i].highlight;
+				//console.log(highlight);
+                if (highlight!=null){
+				
+                   var highlightArr = extractHighlightedSearch(highlight);
+				   //console.log(highlightArr);
+				   var isAdded = false;
+				   for (var iHighlight = 0; iHighlight < highlightArr.length; iHighlight++){
+						for (var iExtended = 0; iExtended < extendedTerms.length; iExtended++){
+							if (extendedTerms[iExtended].toLowerCase() == highlightArr[iHighlight].toLowerCase()){
+								isAdded = true;
+							}								
+						}
+						//if (!isAdded && highlightArr[iHighlight].length>highlightLength){
+						if (!isAdded){
+							extendedTerms.push(highlightArr[iHighlight]);
+						}
+					}
+                }
+            }
+			console.log(" ************************** ");
+			console.log("----- search terms found in datasets: " + extendedTerms.join(", "));
+			resp.data.lastItem = extendedTerms;
+            res.set('Content-Type', 'application/json');
+            res.status(200).send(resp.data);
+
+        })
+        .catch((err) => {
+            console.log(err);
+            return res.status(500).json({
+                msg: 'Error', err
+            });
+        });
+
 })
 
 
@@ -341,29 +457,29 @@ router.post('/semantic-search',(req,res) => {
  * Output: JSONObject : filtered query
  */
 function getFilteredQuery(keyword, filterArray) {
-	var queryObj;
-	console.log(':: filterArray '+ JSON.stringify(filterArray));
-	if (keyword != "") {
-		queryObj = {
-			"simple_query_string": {
-				"query": keyword,
-				"fields": ["fulltext", "fulltext.folded^.7", "citation^3", "citation.folded^2.1"],
-				"default_operator": "and"
-			}
-		};
-	} else {
-		queryObj = {
-			"match_all": {}
-		};
-	}
-	
-		
-	return {
-		"bool": {
-			"must": queryObj,
-			"filter": filterArray
-		}
-	};
+    var queryObj;
+    console.log(':: filterArray ' + JSON.stringify(filterArray));
+    if (keyword != "") {
+        queryObj = {
+            "simple_query_string": {
+                "query": keyword,
+                "fields": ["fulltext", "fulltext.folded^.7", "citation^3", "citation.folded^2.1"],
+                "default_operator": "and"
+            }
+        };
+    } else {
+        queryObj = {
+            "match_all": {}
+        };
+    }
+
+
+    return {
+        "bool": {
+            "must": queryObj,
+            "filter": filterArray
+        }
+    };
 }
 
 function getBooleanQuery(keyword, filterArray) {
@@ -405,7 +521,7 @@ function getBooleanQuery(keyword, filterArray) {
     } else {
         return {"match_all": {}};
     }
-    
+
 
     queryObj = {
         "bool": {
@@ -489,15 +605,43 @@ function getCompleteQuery(boostedQuery, iDisplayStart, iDisplayLength) {
                     'size': 50
                 }
             },
-			'type': {
-				'terms': {
-					'field': 'typeFacet',
-					'size': 50
+            'type': {
+                'terms': {
+                    'field': 'typeFacet',
+                    'size': 50
+                }
             }
-        }
         }
     }
 }
 
+/**
+** Description: collect all expanded terms found in the datasets (needs to be highlighted in text and listed as "expanded terms"), 
+** Input: array with fields containg html including <em>keyword</em>
+** Output: array with keywords
+**/
+function extractHighlightedSearch(highlightArray){
+	var jArr = [];
+	for(var fieldsKey in highlightArray) {
+        //console.log("key:"+fieldsKey+", value:"+highlightArray[fieldsKey]); 
+		var fieldsArray = highlightArray[fieldsKey];
+		for(j = 0; j < fieldsArray.length; j++ ){
+			var highlightedText = fieldsArray[j];
+			//console.log(highlightedText);
+			var startTag = highlightedText.indexOf("<em>");
+			var endTag = 0;
+			var taggedText = "";
+			while (startTag>=0){
+				endTag = highlightedText.indexOf("</em>",startTag);
+				taggedText = highlightedText.substring(startTag+4,endTag);
+				if (jArr.indexOf(taggedText)<0){
+					jArr.push(taggedText);
+				}
+				startTag = highlightedText.indexOf("<em>",endTag+5);
+			}
+		};
+	};
+	return jArr;
+}
 
 module.exports = router;

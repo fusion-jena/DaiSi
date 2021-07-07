@@ -3,12 +3,15 @@ import {HttpClient} from '@angular/common/http';
 import {NgxSpinnerService} from 'ngx-spinner';
 import {CommunicationService} from '../local/communication.service';
 import {Result} from '../../models/result/result';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
     providedIn: 'root'
 })
 export class NodeService {
-    url = 'http://localhost:3000';
+    url = environment.apiUrl;
+	suggestURL = environment.context + environment.suggestUrl;
+	basketURL = environment.context+ environment.basketUrl;
     semantic = false;
 
     constructor(private http: HttpClient, private spinner: NgxSpinnerService,
@@ -34,6 +37,11 @@ export class NodeService {
             term: key
         };
         const headers: { 'Content-Type': string } = {'Content-Type': 'application/json'};
-        return this.http.post<any>(this.url + '/gfbio/suggest', body, {headers});
+        return this.http.post<any>(this.url + this.suggestURL, body, {headers});
+    }
+
+    basket(baskets): any {
+        const headers: { 'Content-Type': string } = {'Content-Type': 'application/json'};
+        return this.http.post(this.url + this.basketURL, baskets, {responseType: 'blob'});
     }
 }

@@ -1,4 +1,9 @@
 <div>
+    <div class="basket mb-3" (click)="basketClick()">
+        <img src="assets/img/basket.png" class="basket-img">
+        <span class="basket-number">{{basketValues.length}}</span>
+        <span class="basket-text">Dataset Basket</span>
+    </div>
     <div *ngIf="result?.getHits()?.length!== 0">
         <app-pagination [result]="result" (paginationClicked)="paginationClicked($event)"></app-pagination>
     </div>
@@ -10,7 +15,8 @@
     <ngx-spinner></ngx-spinner>
     <div *ngIf="result?.getHits()?.length!==0">
         <div *ngFor="let item of result?.getHits(); let i=index" class="pt-1">
-            <app-result-item [item]="item" [itemId]="i" (checkBoxItem)="checkBox($event)"></app-result-item>
+			<app-result-item [item]="item" [itemId]="i" (checkBoxItem)="checkBox($event)"></app-result-item>
+            
         </div>
     </div>
 </div>

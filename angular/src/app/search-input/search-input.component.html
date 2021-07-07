@@ -1,17 +1,19 @@
 <div>
     <form action="#" (ngSubmit)="onSearch()" autocomplete="off">
-        <input type="text" [(ngModel)]="searchKey" (ngModelChange)="onSuggest()" class="searchInput" id="searchField" name="gfbioSearch">
-        <button type="submit" class="searchButton"><fa-icon [icon]="faSearch" class="fa-lg text-gray" id="button"></fa-icon></button>
-        <button type="button" class="searchButton" (click)="semantic()"><img src="assets/img/icon_semsearch2.png" width="40"></button>
-        <div class="basket" (click)="basket()">
-            <img src="assets/img/basket.png" class="basket-img">
-            <span class="basket-number">{{checkBoxValues.length}}</span>
-            <span class="basket-text">Dataset Basket</span>
-        </div>
+				<input type="text" [(ngModel)]="searchKey" (ngModelChange)="onSuggest()" class="searchInput"
+                   id="searchField" name="gfbioSearch" >
+				<button type="submit" class="btn btn-primary btn-blue">
+					<fa-icon [icon]="faSearch" class="fa-lg text-white" id="button"></fa-icon> search
+				</button>
+				<button type="button" class="btn btn-primary btn-blue" (click)="semantic()"><img src="{{semSearchImg}}"
+                                                                                height="18"> semantic search</button>
+
     </form>
+    <div class="text-danger ml-1" *ngIf="alert">please do not use special characters or space</div>
     <div class="position-relative">
         <div class="suggestion-window" *ngIf="windowSuggestion">
-            <app-suggestion-window (windowSuggestKey)="onWindowSuggestKey($event)" (isClicked)="windowSuggestion = false"></app-suggestion-window>
+            <app-suggestion-window (windowSuggestKey)="onWindowSuggestKey($event)"
+                                   (isClicked)="windowSuggestion = false"></app-suggestion-window>
         </div>
     </div>
 </div>

@@ -3,6 +3,9 @@ export class Citation{
     private creator;
     private date;
     private source;
+	private DOI;
+	private dataCenter;
+	
     getTitle(): string {
         return this.title;
     }
@@ -10,11 +13,11 @@ export class Citation{
     setTitle(title: string): void {
         this.title = title;
     }
-    getCreator(): string {
+    getCreator(): Array<string> {
         return this.creator;
     }
 
-    setCreator(creator: string): void {
+    setCreator(creator: Array<string>): void {
         this.creator = creator;
     }
     getDate(): string {
@@ -24,6 +27,10 @@ export class Citation{
     setDate(date: string): void {
         this.date = date;
     }
+	getPubYear(): string {
+        return this.date?.substring(0, 4);
+    }
+
     getSource(): string {
         return this.source;
     }
@@ -31,4 +38,19 @@ export class Citation{
     setSource(source: string): void {
         this.source = source;
     }
+	getDOI(): string {
+        return this.DOI;
+    }
+
+    setDOI(DOI: string): void {
+        this.DOI = DOI;
+    }
+	getDataCenter(): string {
+        return this.dataCenter.toUpperCase();
+    }
+
+    setDataCenter(dataCenter: string): void {
+        this.dataCenter = dataCenter;
+    }
+	
 }

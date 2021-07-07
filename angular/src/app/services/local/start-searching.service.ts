@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {NodeService} from '../remote/node.service';
 import {CommunicationService} from './communication.service';
 import {GfbioPreprocessDataService} from './gfbio-preprocess-data.service';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -12,15 +13,15 @@ export class StartSearchingService {
               private gfbioPreprocessData: GfbioPreprocessDataService) { }
   startSearching(searchKey = '', semantic, from, filters): void{
       let urlTerm: string;
-      const urlIndex = '/gfbio';
+      const urlIndex = environment.context;
       let body: any;
       let key;
       if (semantic === true) {
           key = searchKey.split(' ');
-          urlTerm = '/semantic-search';
+          urlTerm = environment.semSearchUrl;
       } else {
           key = searchKey;
-          urlTerm = '/search';
+          urlTerm = environment.searchUrl;
       }
       body = JSON.stringify({queryterm: key, from,
           size: 10, filter: filters});

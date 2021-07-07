@@ -9,6 +9,7 @@ import {DomSanitizer} from '@angular/platform-browser';
 import {MatDialog} from '@angular/material/dialog';
 import {Hit} from '../../models/result/hit';
 import { ViewEncapsulation } from '@angular/core';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-result-item',
@@ -23,6 +24,10 @@ export class ResultItemComponent implements OnInit {
   faVideo = faVideo;
   faImage = faImage;
   faQuoteLeft = faQuoteLeft;
+  
+  vatImg: string = environment.imagePath + environment.vatImg;
+  imagePath:string = environment.imagePath;
+  
   @Output() checkBoxItem = new EventEmitter<any>();
   constructor(private communicationService: CommunicationService, private sanitizer: DomSanitizer, public dialog: MatDialog) { }
 
@@ -40,7 +45,7 @@ export class ResultItemComponent implements OnInit {
     return this.sanitizer.bypassSecurityTrustUrl(url);
   }
   checkBox(key, value): void {
-    const item = {key, value: value.checked};
-    this.checkBoxItem.emit(item);
+    this.item.setCheckbox(value.checked);
+    this.checkBoxItem.emit(this.item);
   }
 }

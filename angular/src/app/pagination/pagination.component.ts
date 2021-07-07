@@ -1,5 +1,6 @@
 import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
 import {Result} from '../models/result/result';
+import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
 
 @Component({
     selector: 'app-pagination',
@@ -14,8 +15,17 @@ export class PaginationComponent implements OnChanges {
     counter = 2;
     entries = 0;
     isSend = false;
+    maxPageNum = 10;
 
-    constructor() {
+    constructor(breakpointObserver: BreakpointObserver) {
+        breakpointObserver.observe([
+            Breakpoints.HandsetLandscape,
+            Breakpoints.HandsetPortrait
+        ]).subscribe(result => {
+            if (result.matches) {
+                this.maxPageNum = 3;
+            }
+        });
     }
     ngOnChanges(changes: SimpleChanges): void {
         if (changes?.result?.currentValue?.getTotalNumber() !== changes?.result?.previousValue?.getTotalNumber()){

@@ -24,7 +24,7 @@ import {MaterialModule} from './material-module';
 import { BasketDialogComponent } from './basket-dialog/basket-dialog.component';
 import { ResultItemComponent } from './search-result/result-item/result-item.component';
 import { DescriptionComponent } from './search-result/description/description.component';
-
+import { MapComponent } from './map/map.component';
 @NgModule({
     declarations: [
         AppComponent,
@@ -40,7 +40,8 @@ import { DescriptionComponent } from './search-result/description/description.co
         FilterDatePickerComponent,
         BasketDialogComponent,
         ResultItemComponent,
-        DescriptionComponent
+        DescriptionComponent,
+        MapComponent
     ],
     imports: [
         BrowserModule,

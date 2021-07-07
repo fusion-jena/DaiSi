@@ -14,6 +14,10 @@ export class AppComponent {
             key: 'gfbio',
             link: '/'
         }
+/*, {
+            key: 'biodiv',
+            link: '/bio-div'
+        }*/
     ];
 
     constructor(private titleService: Title) {

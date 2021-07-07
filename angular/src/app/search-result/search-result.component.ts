@@ -1,35 +1,46 @@
-import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
-import {CommunicationService} from '../services/local/communication.service';
+import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
 import {Result} from '../models/result/result';
+import {BasketDialogComponent} from '../basket-dialog/basket-dialog.component';
+import {MatDialog} from '@angular/material/dialog';
 
 @Component({
     selector: 'app-search-result',
     templateUrl: './search-result.component.html',
     styleUrls: ['./search-result.component.css']
 })
-export class SearchResultComponent implements OnChanges {
+export class SearchResultComponent {
     semantic: boolean;
     @Input() result = new Result();
-    listOfCheckBox = [];
-    @Output() basket = new EventEmitter<any>();
+    basketValues = [];
     @Output() from = new EventEmitter<any>();
+    @Output() mapItem = new EventEmitter<any>();
 
-    constructor() {
-    }
-
-    ngOnChanges(changes: SimpleChanges): void {
-            this.listOfCheckBox = [];
+    constructor(public dialog: MatDialog) {
     }
 
     checkBox(item): void {
-        this.listOfCheckBox.forEach((dataItem) => {
-            if (dataItem.key === item.key) {
-                this.listOfCheckBox.splice(this.listOfCheckBox.indexOf(dataItem), 1);
-            }
+        if (item.getCheckBox()) {
+            this.basketValues.push(item);
+        } else {
+            const index = this.basketValues.indexOf(item);
+            this.basketValues.splice(index, 1);
+        }
+        this.mapItem.emit(this.basketValues);
+    }
+
+    basketClick(): void {
+        const dialogRef = this.dialog.open(BasketDialogComponent, {
+            data: this.basketValues
         });
-        this.listOfCheckBox.push(item);
-        console.log(this.listOfCheckBox);
-        this.basket.emit(this.listOfCheckBox);
+        dialogRef.afterClosed().subscribe(result => {
+            this.result.getHits().forEach(value => {
+                const index = result.indexOf(value);
+                if (index <= -1) {
+                    value.setCheckbox(false);
+                }
+            });
+            this.mapItem.emit(this.basketValues);
+        });
     }
 
     paginationClicked(from): void {

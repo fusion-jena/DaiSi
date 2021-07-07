@@ -1,8 +1,6 @@
-import {Type} from 'class-transformer';
 import {Bucket} from './bucket';
 
 export class Aggregations {
-    @Type(() => Bucket)
     private buckets: Bucket[];
     private name: string;
     private title: string;

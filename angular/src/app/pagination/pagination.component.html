@@ -2,11 +2,11 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-3">
-                <div>Found {{entries}} entries</div>
+                <div>{{entries}} entries found</div>
             </div>
             <div class="col-md-9">
                 <div *ngIf="items.length!==0">
-                    <jw-pagination [items]="items" (changePage)="onChangePage($event)" (click)="isSend = true"></jw-pagination>
+                    <jw-pagination [items]="items" (changePage)="onChangePage($event)" (click)="isSend = true" [maxPages]="maxPageNum"></jw-pagination>
                 </div>
             </div>
         </div>

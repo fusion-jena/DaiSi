@@ -1,13 +1,10 @@
-import {Expose, Type} from 'class-transformer';
 import {Aggregations} from './aggregations';
 import {Hit} from './hit';
 
 export class Result {
-    @Type(() => Hit)
     private hits: Hit[];
     private semanticKeys: [];
     private totalNumber: number;
-    @Type(() => Aggregations)
     private aggregations: Aggregations[];
     private otherFilters: Array<any>;
     private datePickers: Array<any>;

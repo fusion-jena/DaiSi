@@ -12,6 +12,7 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: 'Lato',sans-serif; color: var(--grey);}
+
 .customTooltip{
     font-size: 15px!important;
 }
@@ -31,16 +32,37 @@ em{
  	 text-decoration-color:#dbe125;
     text-decoration-thickness:5px;
 }
-.searchButton{
-    border-radius: 5px;
+
+/********* Buttons ****************/
+.btn{
+	font-size:12px;
+	text-transform: uppercase;
+}
+.btn-blue{
+    /*border-radius: 5px;*/
     padding: 6px 10px;
     margin-left: 4px;
-    border: none;
-    box-shadow: 0px 1px 6px rgb(115, 120, 116);
+	background-color: #335aa3;
+	color: #fff;
+	text-decoration: none;
+    /*border: none;*/
+    /*box-shadow: 0px 1px 6px rgb(115, 120, 116);*/
 }
 
+.btn-close{
+	padding: 6px 10px;
+    margin-left: 4px;
+	background-color: #ffff;
+	color: #335aa3;
+	text-decoration: none;
+	border-color:#335aa3;
+}
 .text-gray{
     color: var(--grey);
+}
+
+.btn-primary.disabled, .btn-primary:disabled{
+	background-color: #335aa3;
 }
 
 /******* Aggregation/Facets ********/
@@ -130,6 +152,16 @@ em{
     left: 21px;
     top: 6px;
     font-weight: bold;
+}
+
+/***** Dialogs *****/
+.dialog-title{
+	font-size: 20px;
+}
+
+.close-icon{
+	float:right;
+	background-color:#fff;
 }
 
 /*********** Search Result ***********/
@@ -299,6 +331,10 @@ em{
     white-space: nowrap;
     overflow: hidden;
     width: 200px;
+    display: inline-block;
+}
+table {
+    width: 100%;
 }
 .showLess{
     text-overflow: ellipsis;
@@ -339,4 +375,85 @@ input{
     max-width: 100%;
     padding-top: 1em;
     padding-left: 2em;
+}
+table.mat-table {
+    border-spacing: 0;
+    width: 100%;
+}
+
+tr.mat-header-row {
+    height: 56px;
+}
+
+tr.mat-row, tr.mat-footer-row {
+    height: 48px;
+    text-align: center;
+}
+
+th.mat-header-cell {
+    text-align: center;
+}
+
+th.mat-header-cell, td.mat-cell, td.mat-footer-cell {
+    padding: 0;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+}
+
+th.mat-header-cell:first-child, td.mat-cell:first-child, td.mat-footer-cell:first-child {
+    padding-right: 24px;
+}
+
+th.mat-header-cell:last-child, td.mat-cell:last-child, td.mat-footer-cell:last-child {
+    padding-left: 24px;
+}
+
+.footer{
+    align-items: flex-end;
+    padding: 8px;
+    padding-top: 12px;
+}
+.buttonsTr{
+    width: 100% !important;
+}
+.buttonsDiv{
+    width: 100% !important;
+}
+/*override*/
+th.mat-header-cell {
+    text-align: center;
+    padding: 0 30px;
+}
+tr.mat-row, tr.mat-footer-row {
+    height: 48px;
+    text-align: center;
+}
+
+tr.mat-row.no-matching-data{
+    text-align: center;
+}
+.iconButton{
+    border: none;
+    background-color: white;
+}
+.map-container {
+    height: 350px;
+    width: 100%;
+    z-index: 0;
+    position: relative;
+}
+
+.map-frame {
+    height: 100%;
+}
+
+#map {
+    height: 100%;
+}
+.colorBox{
+    width: 4px;
+    margin-right: 8px;
+}
+.half-opacity{
+    opacity: 0.5;
 }

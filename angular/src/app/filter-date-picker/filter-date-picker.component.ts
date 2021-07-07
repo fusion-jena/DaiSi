@@ -1,6 +1,7 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {CommunicationService} from '../services/local/communication.service';
 import * as _moment from 'moment';
+import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
 
 @Component({
     selector: 'app-filter-date-picker',
@@ -16,8 +17,16 @@ export class FilterDatePickerComponent implements OnInit {
     startFormat;
     end;
     endFormat;
-
-    constructor(private communicationService: CommunicationService) {
+    openChart = true;
+    constructor(breakpointObserver: BreakpointObserver) {
+        breakpointObserver.observe([
+            Breakpoints.HandsetLandscape,
+            Breakpoints.HandsetPortrait
+        ]).subscribe(result => {
+            if (result.matches) {
+                this.openChart = false;
+            }
+        });
     }
 
     ngOnInit(): void {

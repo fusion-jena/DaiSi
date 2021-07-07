@@ -7,7 +7,7 @@ The Node Server serves as middleware to handle requests from the search index an
 
 ### NodeJS
 You need to install [NodeJS](https://nodejs.org/en/) on your machine. NodeJS requires a [package manager](https://nodejs.org/en/download/package-manager/).
-"Dataset Search UI" was developed and tested with NodeJS v14.15.4 under Windows 10 and Ubuntu 18.
+"Dai:Si" was developed and tested with NodeJS v14.15.4 under Windows 10 and Ubuntu 18.
 Check your node version with ```node -v```
 
 
@@ -16,6 +16,12 @@ Check your node version with ```node -v```
 Install all necessary dependencies: Navigate to the Node server folder and run
 
 ```npm install```
+
+Create a file named 
+
+```.env```
+
+in your root folder and add the environment variables for API_HOST and HOST and further index specific URLs according your local settings. We provide an '.envExample' file as explanation.
 
 If there are no conflicts, start the server with
 
@@ -31,4 +37,4 @@ Change the port in the app.js file
 
 
 ## License
-"Dataset Search UI" is distributed under the terms of the GNU LGPL v3.0. (https://www.gnu.org/licenses/lgpl-3.0.en.html) 
+"Dai:Si" is distributed under the terms of the GNU LGPL v3.0. (https://www.gnu.org/licenses/lgpl-3.0.en.html) 

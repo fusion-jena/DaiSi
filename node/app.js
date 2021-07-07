@@ -1,4 +1,5 @@
 var express = require('express'); 
+const dotenv = require('dotenv');
 var logger = require('morgan');
 var bodyParser = require('body-parser'); 
 var Cors = require('cors'); //CORS
@@ -7,9 +8,10 @@ var swaggerUi= require('swagger-ui-express');
 const axios = require('axios'); //http calls
 
 const app = express();
+dotenv.config();
 
-//start application on port 3000
-const API_PORT = process.env.API_PORT || 3000;
+//Application Port
+const APP_PORT = process.env.APP_PORT || 3000;
 
 //swagger definition
 const swaggerDefinition = {
@@ -18,7 +20,7 @@ const swaggerDefinition = {
     version: '1.0.0',
     description: 'Endpoints for dataset search',
   },
-  host: 'localhost:3000',
+  host: process.env.HOST,
   basePath: '/',
   securityDefinitions: {
     bearerAuth: {
@@ -85,9 +87,7 @@ app.use(express.json(
 //gfbio index (elastic search)
 var elastic_gfbio = require('./gfbio');
 
-
-
 // eslint-disable-next-line no-console
-app.listen(API_PORT, () => console.log(`Listening on port ${API_PORT}`));
+app.listen(APP_PORT, () => console.log(`Listening on port ${APP_PORT}`));
 
 app.use('/gfbio', elastic_gfbio);

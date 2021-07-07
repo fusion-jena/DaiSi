@@ -6,6 +6,7 @@ import {CommunicationService} from './communication.service';
 import {Aggregations} from '../../models/result/aggregations';
 import {Bucket} from '../../models/result/bucket';
 import {Description} from '../../models/result/description';
+import {Linkage} from '../../models/result/linkage';
 
 @Injectable({
     providedIn: 'root'
@@ -19,12 +20,14 @@ export class GfbioPreprocessDataService {
     public static taxonomy = 'Taxonomy';
     public static geographicRegion = 'Geographic Region';
     public static type = 'Type';
+    private id;
 
 
     constructor(private communicationService: CommunicationService) {
     }
 
     getResult(jsonObject, otherParameters: Array<any>): Result {
+        this.id = 10;
         const result = new Result();
         result.setSemanticKeys(jsonObject?.lastItem);
         const hits: Hit[] = this.getHits(jsonObject, otherParameters[0]);
@@ -45,47 +48,46 @@ export class GfbioPreprocessDataService {
         return hits;
     }
 
-    getCitation(item): Citation {
+    getCitation(item, titleURL, dataCenter): Citation {
         const citation = new Citation();
-        if (String(item?.citation_publisher) === 'PANGAEA') {
-            const xmlStr = item?.xml;
-            const jsonResult = this.communicationService.xmltoJson(xmlStr)?.elements?.[0]?.elements;
-            jsonResult.forEach(value => {
-                switch (value?.name) {
-                    case 'dc:title': {
-                        citation.setTitle(value?.elements?.[0]?.text);
-                        break;
-                    }
-                    case 'dc:creator': {
-                        citation.setCreator(value?.elements?.[0]?.text);
-                        break;
-                    }
-                    case 'dc:date': {
-                        citation.setDate(value?.elements?.[0]?.text);
-                        break;
-                    }
+        const xmlStr = item?.xml;
+        const jsonResult = this.communicationService.xmltoJson(xmlStr)?.elements?.[0]?.elements;
+        const creator = [];
+        jsonResult.forEach(value => {
+            switch (value?.name) {
+                case 'dc:title': {
+                    citation.setTitle(value?.elements?.[0]?.text);
+                    break;
                 }
-            });
-        } else {
-            citation.setSource(item?.citation_source);
-        }
+                case 'dc:creator': {
+                    creator.push(value?.elements?.[0]?.text);
+                    break;
+                }
+                case 'dc:date': {
+                    citation.setDate(value?.elements?.[0]?.text);
+                    break;
+                }
+            }
+        });
+        citation.setDOI(titleURL);
+        citation.setDataCenter(dataCenter);
+        citation.setSource(item?.citation_source);
+        citation.setCreator(creator);
         return citation;
     }
 
     getHit(item, semantic): Hit {
         const source = item?._source;
         const hit = new Hit();
-        const citation = this.getCitation(source);
-        hit.setCitation(citation);
         const dom = document.createRange()
             .createContextualFragment(source?.['html-1']);
         const titleURL = dom?.querySelector('.citation a')?.getAttribute('href');
-		if(titleURL === undefined || titleURL === 'undefined'){
-			hit.setTitleUrl('undefined');
-		}
-		else{
-			hit.setTitleUrl(titleURL);
-		}
+        if (titleURL === undefined || titleURL === 'undefined') {
+            hit.setTitleUrl('undefined');
+        } else {
+            hit.setTitleUrl(titleURL);
+        }
+
         let topic = '';
         dom?.querySelectorAll('.citation span').forEach(spanValue => {
             topic = topic + spanValue.innerHTML;
@@ -98,7 +100,7 @@ export class GfbioPreprocessDataService {
         const description = [];
         tr.forEach(row => {
             const title = row?.querySelectorAll('td')?.[0]?.innerHTML;
-            const value = row?.querySelectorAll('td')?.[1]?.innerText;
+            const value = row?.querySelectorAll('td')?.[1]?.innerHTML;
             if (title === 'Parameters:' || title === 'Summary:') {
                 const descriptionItem = new Description();
                 descriptionItem.setTitle(title);
@@ -106,15 +108,16 @@ export class GfbioPreprocessDataService {
                 description.push(descriptionItem);
             }
         });
-        hit.setDescription(description);
         hit.setAccessType(source?.accessRestricted);
         let dataCenter = source?.dataCenter.split(' ').pop();
         if (dataCenter === 'Science') {
             dataCenter = 'PANGAEA';
         }
         hit.setDataCentre(dataCenter);
+        const citation = this.getCitation(source, titleURL, dataCenter);
+        hit.setCitation(citation);
         let license = source?.licenseShort;
-        if (!Array.isArray(license)){
+        if (!Array.isArray(license)) {
             license = [license];
         }
         license.forEach((l, i) => {
@@ -126,8 +129,10 @@ export class GfbioPreprocessDataService {
         });
         hit.setLicence(license);
         hit.setVat(source?.vatVisualizable);
+        hit.setXml(source?.xml);
         hit.setLongitude(source?.maxLongitude);
         hit.setLatitude(source?.minLatitude);
+        hit.setMetadatalink(source?.metadatalink);
         hit.setYear(source?.citation_date?.substring(0, 4));
         if (semantic) {
             const highLightTitle = item?.highlight?.citation_title?.[0];
@@ -148,27 +153,61 @@ export class GfbioPreprocessDataService {
                 });
             }
         }
-
         const xml = this.communicationService.xmltoJson(source?.xml)?.elements?.[0]?.elements;
         const multimediaObjs: Array<any> = [];
+        const linkage = new Linkage();
+        let relation = '';
         xml.forEach(element => {
+            if (element.name === 'dc:identifier') {
+                hit.setIdentifier(element.elements[0].text);
+            }
             if (element.name === 'linkage') {
-                const text = element.elements[0].text;
-                const differentTypes = [['.mp3', 'sound'], ['.mp4', 'video'],
-                    ['.jpg', 'picture'], ['.tiff', 'picture'],
-                    ['.png', 'picture'], ['.wav', 'sound']];
-                differentTypes.forEach(types => {
-                    if (text.includes(types[0])) {
-                        const multimediaObj = {
-                            type: types[1],
-                            url: text
-                        };
-                        multimediaObjs.push(multimediaObj);
-                    }
-                });
+                if (element.attributes.type === 'multimedia') {
+                    //linkage.setMultimedia(element.elements[0].text);
+                    const text = element.elements[0].text;
+                    const differentTypes = [['.mp3', 'sound'], ['.mp4', 'video'],
+                        ['.jpg', 'picture'], ['.tiff', 'picture'],
+                        ['.png', 'picture'], ['.wav', 'sound']];
+                    differentTypes.forEach(types => {
+                        if (text.includes(types[0])) {
+                            const multimediaObj = {
+                                type: types[1],
+                                url: text
+                            };
+                            multimediaObjs.push(multimediaObj);
+                        }
+                    });
+                    linkage.setMultimedia(multimediaObjs);
+                }
+
+                if (element.attributes.type === 'metadata') {
+                    linkage.setMetadata(element.elements[0].text);
+                }
+                if (element.attributes.type === 'data') {
+                    linkage.setData(element.elements[0].text);
+                }
+
+            }
+            if (element.name === 'dc:relation') {
+                let value = element.elements[0].text;
+                if (value.startsWith('http')) {
+                    value = '<a ' + 'href = "' + value + '" >' + value + '</a>';
+                }
+                relation = relation + value + '<br>';
             }
         });
+        if (relation !== '') {
+            const descriptionItem = new Description();
+            descriptionItem.setTitle('Relation:');
+            descriptionItem.setValue(relation);
+            description.push(descriptionItem);
+        }
+        hit.setLinkage(linkage);
+        hit.setDescription(description);
         hit.setMultimediaObjs(multimediaObjs);
+        const colors = ['#94e851', '#f52f57', '#173b4e', '#ee82ee', '#ffff00', '#27408b', '#009acd', '#ff00ff', '#8b0000', '#00fa9a'];
+        hit.setColor(colors[this.id - 1]);
+        this.id = this.id - 1;
         return hit;
     }
 
@@ -289,6 +328,4 @@ export class GfbioPreprocessDataService {
         }
         return icon;
     }
-
-
 }
