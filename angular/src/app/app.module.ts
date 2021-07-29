@@ -24,7 +24,9 @@ import {MaterialModule} from './material-module';
 import { BasketDialogComponent } from './basket-dialog/basket-dialog.component';
 import { ResultItemComponent } from './search-result/result-item/result-item.component';
 import { DescriptionComponent } from './search-result/description/description.component';
+import { ContextBoxComponent } from './context-box/context-box.component';
 import { MapComponent } from './map/map.component';
+
 @NgModule({
     declarations: [
         AppComponent,
@@ -41,6 +43,7 @@ import { MapComponent } from './map/map.component';
         BasketDialogComponent,
         ResultItemComponent,
         DescriptionComponent,
+        ContextBoxComponent,
         MapComponent
     ],
     imports: [

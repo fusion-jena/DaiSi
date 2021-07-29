@@ -47,6 +47,13 @@ export class SearchInputComponent {
     semantic(): void {
         this.semanticValue = true;
         this.startSearching(this.semanticValue);
+
+        var subject = this.communicationService.getSearchKey();
+        subject.next(this.searchKey);
+        subject.subscribe(value => {
+          this.searchKey = value;
+        });
+
     }
 
     startSearching(semantic: boolean): void {

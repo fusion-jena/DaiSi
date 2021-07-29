@@ -10,6 +10,11 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
 import {MatNativeDateModule} from '@angular/material/core';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import {MatCardModule} from "@angular/material/card";
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatDividerModule} from '@angular/material/divider';
+import {MatMenuModule} from '@angular/material/menu';
+
 
 @NgModule({
     exports: [
@@ -24,6 +29,10 @@ import {MatTooltipModule} from '@angular/material/tooltip';
         MatInputModule,
         MatNativeDateModule,
         MatTooltipModule,
+        MatCardModule,
+        MatProgressSpinnerModule,
+        MatDividerModule,
+        MatMenuModule
     ],
     providers: [MatDatepickerModule, MatNativeDateModule],
 })

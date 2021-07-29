@@ -170,7 +170,7 @@ export class Hit {
         if (this.getLatitude !== undefined && this.getLongitude() !== undefined) {
             return 'This dataset has coordinates: min latitude: ' + this.getLatitude() + ', max longitude: ' + this.getLongitude();
         } else {
-            return 'This dataset has coordinates.';
+            return 'This dataset has no coordinates.';
         }
     }
 	

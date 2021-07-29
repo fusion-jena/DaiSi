@@ -57,6 +57,10 @@ You can add the elements that you want to put into the basket by `basketValues`.
 Please report bugs and issues in the GitHub issue tracker.
 
 ## Changelog
+29.07.2021 pre-release 0.4_beta
+* Terminology widget added (info box in semantic search - explanation on expanded terms)
+* dataset basket improvements: spinner added (creation of zip file can take some seconds), 'empty basket' function
+
 07.07.2021 second official release 0.3
 * minimap added (select a dataset and if coordinates are present the geographic location is shown on the map)
 * dataset basket with download function (select datasets, open the basket and download all files as zip)

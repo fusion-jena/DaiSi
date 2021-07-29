@@ -4,6 +4,7 @@ import {Hit} from './hit';
 export class Result {
     private hits: Hit[];
     private semanticKeys: [];
+    private termData: [];
     private totalNumber: number;
     private aggregations: Aggregations[];
     private otherFilters: Array<any>;
@@ -31,6 +32,12 @@ export class Result {
     }
     setSemanticKeys(semanticKeys: []): void {
         this.semanticKeys = semanticKeys;
+    }
+    getTermData(): string[] {
+        return this.termData;
+    }
+    setTermData(termData: []): void {
+        this.termData = termData;
     }
     getAggregations(): Aggregations[] {
         return this.aggregations;

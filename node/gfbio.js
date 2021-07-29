@@ -56,6 +56,7 @@ var Pangaea_Suggest_URL = process.env.PANGAEA_SUGGEST_URL;
  */
 router.post('/search', (req, res) => {
 
+    console.log('/search' + req.body);
     //in case you want to use the elasticmodule
     /*search.sendQuery(req.body).then(resp=>{
 
@@ -159,7 +160,7 @@ router.post('/search', (req, res) => {
  *         description: object with key 'suggest' containing an array with options
  */
 router.post('/suggest', (req, res) => {
-    //console.log('Body:' + req.body.term);
+    console.log('/suggest:' + req.body.term);
     //get the term from the body
     const term = req.body.term
 
@@ -197,6 +198,7 @@ router.post('/suggest', (req, res) => {
         });
 
 })
+
 router.post('/basket', (req, res) => {
     // res.status(200).send(req.body.basket);
     const selectedBasket = req.body.basket;
@@ -270,61 +272,67 @@ router.post('/basket', (req, res) => {
  * semantic search service (based on query expansion)
  * search query is sent to GFBio TS first, only expanded result is forwarded to elasticsearch
  */
-/**
- * @swagger
- * /gfbio/semantic-search:
- *   post:
- *     description: search query is sent to GFBio TS first, only expanded result is forwarded to elasticsearch
- *     tags: [Search GFBio - Elastic index]
- *     summary: returns search results including semantic related results
- *     consumes:
- *       - application/json
- *     parameters:
- *       - in: body
- *         name: queryterm
- *         description: the query as string array
- *         schema:
- *            type: object
- *            required:
- *              - queryterm
- *            properties:
- *              queryterm:
- *                type: array
- *                items:
- *                   type: string
- *                example: [honeybee,grassland]
- *              from:
- *                type: integer
- *                description: from which page to start?
- *                example: 0
- *              size:
- *                type: integer
- *                description: how many datasets to return per page?
- *                example: 10
- *     responses:
- *       201:
- *         description: hits.hits contains an array with dataset objects matching the query.
- */
+ /**
+   * @swagger
+   * /gfbio/semantic-search:
+   *   post:
+   *     description: search query is sent to GFBio TS first, only expanded result is forwarded to elasticsearch
+   *     tags: [Search GFBio - Elastic index]
+   *     summary: returns search results including semantic related results
+   *     consumes:
+   *       - application/json
+   *     parameters:
+   *       - in: body
+   *         name: queryterm
+   *         description: the query as string array
+   *         schema:
+   *            type: object
+   *            required:
+   *              - queryterm
+   *            properties:
+   *              queryterm:
+   *                type: array
+   *                items: 
+   *                   type: string
+   *                example: [honeybee,grassland]
+   *              from:
+   *                type: integer
+   *                description: from which page to start?
+   *                example: 0
+   *              size:
+   *                type: integer
+   *                description: how many datasets to return per page?
+   *                example: 10
+   *     responses:
+   *       201:
+   *         description: hits.hits contains an array with dataset objects matching the query.
+   */
 router.post('/semantic-search', (req, res) => {
 
-    /*e.g., 
-	* {
-    *	"queryterm":["grassland","honeybee"],
-    * 	"from":0,
-    * 	"size":10
-	* }
-	*/
+    console.log('/semantic-search' + req.body);
+      /*e.g.,
+    * {
+      *	"queryterm":["grassland","honeybee"],
+      * 	"from":0,
+      * 	"size":10
+    * }
+    */
 
     //expects keyword as string array
     const keywords = req.body.queryterm; //array with keywords
 
+    console.log(keywords);
+
     let allKeyWords = keywords;
     let axiosArray = [];
+
+    let termData = [];
 
     //at first, send each keyword to GFBio TS
     for (i = 0; i < keywords.length; i++) {
         //console.log("keyword: "+keywords[i]);
-        axiosArray.push(axios.get(GFBioTS_URL + "search?query=" + keywords[i] + "&match_type=exact"))
+        axiosArray.push(axios.get(GFBioTS_URL + "search?query=" + keywords[i] + "&match_type=exact"));
+        console.log(axiosArray[i]);
     }
     //collect all calls first and then send it in a bunch
     //axios will handle them in parallel and will only continue when all calls are back
@@ -337,7 +345,7 @@ router.post('/semantic-search', (req, res) => {
 					var log = "";
 					//console.log(item);
                     for (const [key, value] of Object.entries(item)) {
-						if (item.sourceTerminology !== 'GEONAMES'){
+						if (item.sourceTerminology !== 'GEONAMES' && item.sourceTerminology !== 'RIVERS_DE'){
 							if (key === 'commonNames') {
 							  var keyword = value.toString().replace(/,/g,"\"|\"");
                               allKeyWords = allKeyWords.concat("\""+keyword+"\"")
@@ -353,19 +361,28 @@ router.post('/semantic-search', (req, res) => {
                               allKeyWords = allKeyWords.concat("\""+value+"\"")
                               log += "----- label : " + value+"\n";
                             }
-						}
+						 
+                        }
                     }
-					if (log.length>0){
-						console.log("----- sourceTerminology : " + item.sourceTerminology);
-						console.log("----- uri : " + item.uri);
-						console.log(log);
+					if (item.sourceTerminology !== 'GEONAMES' && item.sourceTerminology !== 'RIVERS_DE'){
+						termData.push(item);
 					}
+                    
+
+
+                    if (log.length>0){
+                      console.log("----- sourceTerminology : " + item.sourceTerminology);
+                      console.log("----- uri : " + item.uri);
+                      console.log(log);
+                    }
                 });
             }
             console.log(" ************************** ");
+
             allKeyWords = allKeyWords.filter((a, b) => allKeyWords.indexOf(a) === b)
-			var semanticTerms = allKeyWords.join("|");
-			console.log(semanticTerms);
+
+			      var semanticTerms = allKeyWords.join("|");
+			      console.log(semanticTerms);
             //elastic call
             let filter = [];
             let from = 0;
@@ -407,34 +424,91 @@ router.post('/semantic-search', (req, res) => {
         }))
         .then(resp => {
             //last item is necessary for highlighting the expanded terms
+
+            resp.data.termData = termData;
+
             //resp.data.lastItem = allKeyWords;
-			var extendedTerms = [];
-			var result = resp.data.hits.hits;
+            var extendedTerms = [];
+            var result = resp.data.hits.hits;
             for (var i = 0, iLen = result.length; i < iLen; i++) {
                 var highlight = result[i].highlight;
-				//console.log(highlight);
+				        //console.log(highlight);
                 if (highlight!=null){
-				
                    var highlightArr = extractHighlightedSearch(highlight);
-				   //console.log(highlightArr);
-				   var isAdded = false;
-				   for (var iHighlight = 0; iHighlight < highlightArr.length; iHighlight++){
-						for (var iExtended = 0; iExtended < extendedTerms.length; iExtended++){
-							if (extendedTerms[iExtended].toLowerCase() == highlightArr[iHighlight].toLowerCase()){
-								isAdded = true;
-							}								
-						}
-						//if (!isAdded && highlightArr[iHighlight].length>highlightLength){
-						if (!isAdded){
-							extendedTerms.push(highlightArr[iHighlight]);
-						}
-					}
+                   //console.log(highlightArr);
+                   var isAdded = false;
+                   for (var iHighlight = 0; iHighlight < highlightArr.length; iHighlight++){
+                      for (var iExtended = 0; iExtended < extendedTerms.length; iExtended++){
+                        if (extendedTerms[iExtended].toLowerCase() == highlightArr[iHighlight].toLowerCase()){
+                          isAdded = true;
+                        }
+                      }
+                      //if (!isAdded && highlightArr[iHighlight].length>highlightLength){
+                      if (!isAdded){
+                        extendedTerms.push(highlightArr[iHighlight]);
+                      }
+                    }
                 }
             }
-			console.log(" ************************** ");
-			console.log("----- search terms found in datasets: " + extendedTerms.join(", "));
-			resp.data.lastItem = extendedTerms;
+            console.log(" ************************** ");
+            console.log("----- search terms found in datasets: " + extendedTerms.join(", "));
+            resp.data.lastItem = extendedTerms;
+
             res.set('Content-Type', 'application/json');
+            res.status(200).send(resp.data);
+
+        })
+        .catch((err) => {
+            console.log(err);
+            return res.status(500).json({
+                msg: 'Error', err
+            });
+        });
+
+})
+
+router.post('/narrow', (req, res) => {
+    console.log('narrow:' + req.body);
+    //get term from the body
+    const id = req.body.id
+    const uri = req.body.uri
+
+    const config = {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }
+
+    return axios.get(GFBioTS_URL + id + '/narrower?uri=' + uri, config)
+        .then((resp) => {
+            console.log(resp.data);
+            res.status(200).send(resp.data);
+
+        })
+        .catch((err) => {
+            console.log(err);
+            return res.status(500).json({
+                msg: 'Error', err
+            });
+        });
+
+})
+
+router.post('/broad', (req, res) => {
+    console.log('broad:' + req.body);
+    //get term from the body
+    const id = req.body.id
+    const uri = req.body.uri
+
+    const config = {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }
+
+    return axios.get(GFBioTS_URL + id + '/broader?uri=' + uri, config)
+        .then((resp) => {
+            console.log(resp.data);
             res.status(200).send(resp.data);
 
         })
@@ -503,9 +577,10 @@ function getBooleanQuery(keyword, filterArray) {
                     "description^2.1", "description.folded",
                     "parameter.folded", "region.folded", "dataCenter.folded"];
             }
+			var keywordWithQuotes = keyword[i];
             boostedKeywords.push({
                 "simple_query_string": {
-                    "query": keyword[i],
+                    "query": keywordWithQuotes,
                     "fields": fields,
                     "default_operator": "and",
                     "boost": booster
@@ -533,6 +608,7 @@ function getBooleanQuery(keyword, filterArray) {
             "filter": filterArray
         }
     }
+
 
     return queryObj;
 }

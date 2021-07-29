@@ -12,6 +12,7 @@ export class DescriptionComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+    //console.log(this.des);
   }
   showLess(length): boolean {
     if (this.showMore === true) {

@@ -8,12 +8,14 @@ import {MatDialog} from '@angular/material/dialog';
     templateUrl: './search-result.component.html',
     styleUrls: ['./search-result.component.css']
 })
-export class SearchResultComponent {
+export class SearchResultComponent{
     semantic: boolean;
     @Input() result = new Result();
     basketValues = [];
     @Output() from = new EventEmitter<any>();
     @Output() mapItem = new EventEmitter<any>();
+
+    popoverVisible = '';
 
     constructor(public dialog: MatDialog) {
     }
@@ -30,7 +32,8 @@ export class SearchResultComponent {
 
     basketClick(): void {
         const dialogRef = this.dialog.open(BasketDialogComponent, {
-            data: this.basketValues
+            data: this.basketValues,
+            disableClose: true
         });
         dialogRef.afterClosed().subscribe(result => {
             this.result.getHits().forEach(value => {

@@ -29,7 +29,7 @@ export class NodeService {
             results = serviceType.getResult(data, otherParameters);
             this.communicationService.setResult(results);
             this.spinner.hide();
-        });
+        },err => {alert(environment.textAlertSemSearchError);this.spinner.hide();});
     }
 
     suggest(key): any {
@@ -43,5 +43,23 @@ export class NodeService {
     basket(baskets): any {
         const headers: { 'Content-Type': string } = {'Content-Type': 'application/json'};
         return this.http.post(this.url + this.basketURL, baskets, {responseType: 'blob'});
+    }
+
+    narrow(id, uri): any {
+        const body = {
+            id: id,
+            uri: uri
+        };
+        const headers: { 'Content-Type': string } = {'Content-Type': 'application/json'};
+        return this.http.post<any>(this.url + '/gfbio/narrow', body, {headers});
+    }
+
+    broad(id, uri): any {
+        const body = {
+            id: id,
+            uri: uri
+        };
+        const headers: { 'Content-Type': string } = {'Content-Type': 'application/json'};
+        return this.http.post<any>(this.url + '/gfbio/broad', body, {headers});
     }
 }

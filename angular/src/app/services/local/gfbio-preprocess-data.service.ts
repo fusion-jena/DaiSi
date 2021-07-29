@@ -36,6 +36,7 @@ export class GfbioPreprocessDataService {
         result.setTotalNumber(jsonObject?.hits?.total);
         result.setOtherFilters(this.getOtherFilters());
         result.setDatePickers(this.getDatePickers());
+        result.setTermData(jsonObject?.termData);
         return result;
     }
 
@@ -193,13 +194,13 @@ export class GfbioPreprocessDataService {
                 if (value.startsWith('http')) {
                     value = '<a ' + 'href = "' + value + '" >' + value + '</a>';
                 }
-                relation = relation + value + '<br>';
+                relation = relation + '<li>' + value + '</li>';
             }
         });
         if (relation !== '') {
             const descriptionItem = new Description();
             descriptionItem.setTitle('Relation:');
-            descriptionItem.setValue(relation);
+            descriptionItem.setValue('<ul>' + relation + '</ul>');
             description.push(descriptionItem);
         }
         hit.setLinkage(linkage);

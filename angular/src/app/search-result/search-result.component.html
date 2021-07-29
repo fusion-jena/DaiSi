@@ -1,7 +1,9 @@
 <div>
     <div class="basket mb-3" (click)="basketClick()">
-        <img src="assets/img/basket.png" class="basket-img">
-        <span class="basket-number">{{basketValues.length}}</span>
+        <div class="basket-img">
+            <img src="assets/img/basket.png" class="w-100">
+            <span class="basket-number Absolute-Center">{{basketValues.length}}</span>
+        </div>
         <span class="basket-text">Dataset Basket</span>
     </div>
     <div *ngIf="result?.getHits()?.length!== 0">
@@ -10,7 +12,17 @@
     <div *ngIf="result?.getHits()?.length=== 0" class="text-danger">No entries found</div>
     <div *ngIf="result?.getSemanticKeys()!== undefined">
         <span>Expanded terms: </span>
-        <span *ngFor="let item of result?.getSemanticKeys()" class="highlightedKey" matTooltip="related term obtained from GFBio's Terminology Service" matTooltipClass="result-item-tooltip">{{item}}</span>
+        <span *ngFor="let item of result?.getSemanticKeys()" class="highlightedKey">
+
+            <!-- only display a context-box for the hovered semantic key -->
+            <div (mouseover)="popoverVisible=item" (mouseleave)="popoverVisible=''">
+                {{item}}
+                <div [hidden]="popoverVisible!=item">
+                    <app-context-box [term]="item" [termData]="result?.getTermData()"></app-context-box>
+                </div>
+            </div>
+
+        </span>
     </div>
     <ngx-spinner></ngx-spinner>
     <div *ngIf="result?.getHits()?.length!==0">

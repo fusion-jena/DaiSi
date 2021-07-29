@@ -11,7 +11,7 @@ const app = express();
 dotenv.config();
 
 //Application Port
-const APP_PORT = process.env.APP_PORT || 3000;
+const APP_PORT = process.env.APP_PORT || 3001;
 
 //swagger definition
 const swaggerDefinition = {
