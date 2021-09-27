@@ -16,40 +16,20 @@ A live demo is available here: https://dev.gfbio.uni-jena.de/daisi/
 
 The Node Server and its API is also available: https://dev.gfbio.uni-jena.de/daisi-api/api-docs/
 
-## How to setup Dataset Search UI for an own index
+## How to setup Dai:Si for your own index
 
-Please follow the instructions below if you want to use [Dai:Si] for your own search index. Make sure that your index is available 
-
-1. Create a new component for your index
-2. Go to `app.component.ts` and add a new entry to the array of 'indexes' with a title and a URL (e.g., 'myNewIndex', '/myNewIndex' ).
-3. Go to the `app-routing.module.ts`, import your newly created component and add an entry to the routes array, e.g.,
-
-``const routes: Routes = [
-  { path: '', component: GfbioComponent },
-  { path: '/myNewIndex', component: MyNewIndex }
-];
-``
-
-4. Go to the html file of the component that you created and add the components you want to use. For instance, if you need the search-result component, which displays a search result and also includes pagination, you should add
-
-``<app-search-result [result]="result" (basket)="checkBox($event)" (from)="paginationClicked($event)"></app-search-result>``
-
-5. Then go to the `*.ts` file and implement from "SearchResult"(example:go to the `gfbio.component.ts`). You need to pass the content information through the "result" parameter (subscribed to the `communicationService.getResult()`). If a user clicks on an entry in the pagination component, you can get the click's action and the page number from the "paginationClicked" function. If the user clicks a check box in the results, you can get the click's action and the checked results, from "checkBox" function. If you need the filters component, you need to add the 
-
-``<app-filters [result]="result" (filters)="filterSubmitted($event)" [resetFilters]="resetFilters"></app-filters>``
-
-Again you need to pass the results through a "result" parameter. If you need to clean the filters (example: new search key) by an action, 
-you need to pass it by `resetFilters= true`. You can get the clicked filters by the "filterSubmitted" function.
-
-If you need the search-input component, add 
-
-``<app-search-input [checkBoxValues]="basketValues" (basketChecked)="basketChecked()" (searchKeyEmmit)="searchKeySubmitted($event)"></app-search-input>``
-
-You can add the elements that you want to put into the basket by `basketValues`. If the user clicks on the basket, the action can be received by the `basketChecked` function. If the user clicks on one of the search buttons (search, semantic), the action can be received by the `searchKeySubmitted` function. The input of the function is an array. The first item is the search key and the second one is a boolean value and represents if the search is semantic or not. Now you have all the information you need for sending the http request (such as search keys, filters, pagination, ...) - we are ready to send the request.
-
-6. To send a request, you need a service which is responsible to map the results of the http request to the result object which is used in the search-result component to show the information. Create a new service under the services/local directory (example: `gfbio-preprocess-data.service.ts`). Go to the component that you want to send the request and inject the service in the constructor, e.g., "NodeService".
-
-7. When calling the "search" method in the "NodeService", you need to pass 4 parameters (urlTerm, body, the service for mapping the result, parameters that you need in the mapping service). Check the example in the `Start-searching.Service.ts`.
+Setting up Dai:Si for your own search index comprises a few steps that are additionally described in the [Node Server] and the [Angular app] sections.
+ 
+1. create a new module in the NodeServer for your search index (myIndex.js) and provide a search ``/search`` function
+2. add your module to the app.js file and add the new APIs to swagger
+3. test the connection, e.g., (http://localhost:3000/myIndex/search, http://localhost:3000/api-docs)
+4. add further function to your module if necessary, e.g., ``/suggest`` (for auto-complete function) and ``/semantic-search`` (if you want to expand the query keywords on related terms)
+5. create a new component with the angular cli, e.g., ``ng generate component myIndex``
+6. in ``app.components.ts`` and ``app-routing.module.ts``  add your component to the index and route arrays
+7. implement your component (add the required components to the html file, add the methods to the ts file)
+8. map your index fields to Dai:Si’s underlying data model (create a new service, e.g., ``myIndex-preprocess-data.service.ts`` file)
+9. in your new component, call the node service and pass the parameters of your custom index
+10. test your new application: http://localhost:4200/myIndex
 
 
 ## Issue Tracking
