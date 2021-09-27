@@ -35,6 +35,32 @@ Please report issues and bugs in the GitHub issue tracker.
 
 Change the port in the app.js file
 
+## Integrating an own/new indexes
+
+Create a new file, e.g., `myIndex.js` and add this new module in the const swagger options
+
+``const options = {
+  swaggerDefinition,
+  apis: ['gfbio.js', 'myIndex.js']
+};``
+
+Integrate the new module and add it with an own URL
+
+``var elastic_myIndex = require('./myIndex');
+app.use('/myIndex', elastic_myIndex);``
+
+Implement at least a '/search' function, and if available '/suggest' and '/semantic-search'. 
+An example for elasticsearch is provided in the gfbio module. Adjust the facets for your needs.
+
+``'aggs': {
+            'taxonomy': {
+                'terms': {
+                    'field': 'taxonomyFacet',
+                    'size': 50
+                }
+            }, [...]``
+
+Test your new search function, e.g.: http://localhost:3000/myIndex/search
 
 ## License
 [Dai:Si] is distributed under the terms of the GNU LGPL v3.0. (https://www.gnu.org/licenses/lgpl-3.0.en.html) 
