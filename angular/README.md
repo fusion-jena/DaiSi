@@ -15,6 +15,71 @@ The src/environment folder contains two files for local settings and adjustments
 `environment.prod.ts` - environment file for production
 
 
+## Components
+
+The UI consists of multiple components that communicate with each other via internal services.
+
+**Search Input** (search input field)
+
+**Search Result** (search result)
+
+**Filters** (aggregations and facets, date pickers)
+
+**Paging** (paging component)
+
+**Suggestion** (auto-completion)
+
+**Citation** (citation dialog)
+
+**Services** (local and remote services for inter component communication as well as communication with the backend, e.g., search indexes)
+
+## Adding and mapping a new index
+
+Please follow the instructions below if you want to use [Dai:Si] for your own search index. Make sure that your index is available 
+
+1. Create a new component for your index, e.g., ``ng generate component myIndex``
+2. Go to `app.component.ts` and add a new entry to the array of 'indexes' with a title and a URL (e.g., 'myIndex', '/myIndex' ). Go to the `app-routing.module.ts`, import your newly created component and add an entry to the routes array, e.g.,
+
+``const routes: Routes = [
+  { path: '', component: GfbioComponent },
+  { path: '/myIndex', component: MyIndex }
+];
+``
+
+4. Go to the html file of the component that you created and add the components you want to use. For instance, if you need the search-result component, which displays a search result and also includes pagination, you should add
+
+``<app-search-result [result]="result" (basket)="checkBox($event)" (from)="paginationClicked($event)"></app-search-result>``
+
+Then go to the `*.ts` file and implement from "SearchResult"(example:go to the `gfbio.component.ts`). You need to pass the content information through the "result" parameter (subscribed to the `communicationService.getResult()`). If a user clicks on an entry in the pagination component, you can get the click's action and the page number from the "paginationClicked" function. If the user clicks a check box in the results, you can get the click's action and the checked results, from "checkBox" function. If you need the filters component, you need to add the 
+
+``<app-filters [result]="result" (filters)="filterSubmitted($event)" [resetFilters]="resetFilters"></app-filters>``
+
+Again you need to pass the results through a "result" parameter. If you need to clean the filters (example: new search key) by an action, 
+you need to pass it by ``resetFilters= true``. You can get the clicked filters by the 'filterSubmitted' function.
+
+If you need the search-input component, add 
+
+``<app-search-input [checkBoxValues]="basketValues" (basketChecked)="basketChecked()" (searchKeyEmmit)="searchKeySubmitted($event)"></app-search-input>``
+
+You can add the elements that you want to put into the basket by `basketValues`. If the user clicks on the basket, the action can be received by the `basketChecked` function. If the user clicks on one of the search buttons (search, semantic), the action can be received by the `searchKeySubmitted` function. The input of the function is an array. The first item is the search key and the second one is a boolean value, which shows if the search is semantic or not. Now you have all the information you need for sending the http request (such as search keys, filters, pagination, ...) - we are ready to send the request.
+
+5. To send a request, you need a service which is responsible to map the results of the http request to the result object which is used in the search-result component to show the information. Create a new service under the services/local directory (example: `gfbio-preprocess-data.service.ts`. Go to the component that you want to send the request and inject the service in the constructor, e.g., "NodeService".
+
+6. When calling the "search" method in the "NodeService", you need to pass 4 parameters (urlTerm, body, the service for mapping the result, parameters that you need in the mapping service). Check the example in the `Start-searching.Service.ts`.
+
+
+# Data Model
+
+The underlying data model is depicted in the diagram below. A search result consists of two arrays with hits and aggregations. An aggregation can have multiple facets. A hit consists of UpperLabels (the labels presented on top of every dataset), a Description, a Citation (the citation dialog box) and a Linkage (to link multimedia files). If a field in the data model is not filled it can not be displayed. Please map all your index fields to the respective attributes or classes in the ``<yourIndex>-preprocess-data.service.ts`` file.
+
+![Diagram](src/assets/img/diagram.png)
+
+After retrieving the results, it is mapped to the result class.
+<br />The orange rectangels are classes.
+<br />The blue ellipses are attributes.
+ 
+
+
 ## General Angular instructions
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 10.1.0.
