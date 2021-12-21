@@ -5,10 +5,10 @@
 export const environment = {
   production: false,
   
-  Keycloak_Url: 'https://keycloak.sso.gwdg.de/auth',
+  Keycloak_Url: '',
   Keycloak_RedirectUri: 'https://dev.gfbio.uni-jena.de/daisi',
-  Keycloak_Realm: 'GFBio',
-  Keycloak_ClientId: 'dev-gfbio-angular',
+  Keycloak_Realm: '',
+  Keycloak_ClientId: '',
   
   apiUrl: 'https://dev.gfbio.uni-jena.de/daisi-api',
   context: '/gfbio',
