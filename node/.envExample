@@ -1,9 +1,0 @@
-# If you want to get the environmental variables working, please rename this file to ".env" only. 
-# The file is not part of .gitignore, so please do not add sensitive data/information. Add those
-# information inside .env itself. 
-
-APP_PORT=3000
-HOST="localhost:3000"
-GFBIOTS_URL="http://terminologies.gfbio.org/api/terminologies/"
-PANGAEA_URL="http://ws.pangaea.de/es/dataportal-gfbio/_search"
-PANGAEA_SUGGEST_URL="http://ws.pangaea.de/es/dataportal-gfbio/_suggest"

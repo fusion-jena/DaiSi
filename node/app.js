@@ -10,8 +10,19 @@ const axios = require('axios'); //http calls
 const app = express();
 dotenv.config();
 
-//Application Port
-const APP_PORT = process.env.APP_PORT || 3001;
+const session = require('express-session')
+var memoryStore = new session.MemoryStore();
+app.use(session({ secret: 'a633d717-1b6e-4ea2-8b38-4af385b13585', resave: false, saveUninitialized: true, store: memoryStore }));
+const keycloak = require('./config/keycloak.config.js').initKeycloak(memoryStore);
+app.use(keycloak.middleware({ logout: '/logoff' }));
+
+app.get('/', function(req, res){
+   res.send("Server is up!");
+});
+
+//start application on port 3000
+const APP_PORT = process.env.APP_PORT || 3000;
+const HOST = process.env.HOST;
 
 //swagger definition
 const swaggerDefinition = {
@@ -83,11 +94,16 @@ app.use(express.json(
   verify: undefined
 }))
 
+const db = require("./models");
+
+db.sequelize.sync();
+
+require("./routes/basket.route")(app);
 
 //gfbio index (elastic search)
 var elastic_gfbio = require('./gfbio');
 
 // eslint-disable-next-line no-console
-app.listen(APP_PORT, () => console.log(`Listening on port ${APP_PORT}`));
+app.listen(APP_PORT, () => console.log(`Listening at ${HOST} on port ${APP_PORT}`));
 
 app.use('/gfbio', elastic_gfbio);

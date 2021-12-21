@@ -7,7 +7,7 @@ const Blob = require('node-blob');
 var FileSaver = require('file-saver');
 var fs = require("fs");
 var JSZip = require("jszip");
-
+var basket = require('./controllers/basket.controller')
 // module to establish a connection to Elasticsearch
 // currently not needed
 //var search = require('./connectionElastic');
@@ -98,14 +98,14 @@ router.post('/search', (req, res) => {
 
     //get the filtered query
     const filteredQuery = getFilteredQuery(keyword, filter);
-    
+
 
     //apply the boost
     const boostedQuery = applyBoost(filteredQuery);
 
     //construct the complete query with from and size
     const data = getCompleteQuery(boostedQuery, from, size);
-	console.log(JSON.stringify(data));
+    console.log(JSON.stringify(data));
     //config the header, we only accept json data
     const config = {
         headers: {
@@ -199,7 +199,37 @@ router.post('/suggest', (req, res) => {
 
 })
 
-router.post('/basket', (req, res) => {
+/**
+ * POST /basketDownload
+ * download the basket
+ */
+/**
+ * @swagger
+ * /gfbio/basketDownload:
+ *   post:
+ *     description: downloads the chosen datasets
+ *     tags: [Search GFBio - Elastic index]
+ *     summary: downloads the chosen datasets
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: basket
+ *         description: the object contains array of datasets
+ *         schema:
+ *            type: object
+ *            required:
+ *              - basket
+ *            properties:
+ *              basket:
+ *                type: array
+ *                items:
+ *                   type: object
+ *     responses:
+ *       201:
+ *         description: the browser stars to download
+ */
+router.post('/basketDownload', (req, res) => {
     // res.status(200).send(req.body.basket);
     const selectedBasket = req.body.basket;
 
@@ -213,23 +243,24 @@ router.post('/basket', (req, res) => {
         zip.file(identifier + "_metadata.xml", result['xml']);
 
         // data
-        if(result.linkage.data) {
+        if (result.linkage.data) {
             names.push("");
 
             var datalink = decodeURIComponent(result.linkage.data);
-            
+
             axiosArray.push(axios.get(datalink, {
                 responseType: 'arraybuffer',
-                headers: { "Content-Type": "text/plain; charset=x-user-defined" }}));
-         }
+                headers: {"Content-Type": "text/plain; charset=x-user-defined"}
+            }));
+        }
 
         // multimedia
-        if(result.linkage.multimedia) {
+        if (result.linkage.multimedia) {
             for (var i = 0; i < result.linkage.multimedia.length; i++) {
                 names.push(new URL(result.linkage.multimedia[i].url).pathname.split('/').pop());
 
                 var multimedialink = decodeURIComponent(result.linkage.multimedia[i].url);
-            
+
                 axiosArray.push(axios.get(multimedialink, {
                     responseType: 'arraybuffer'
                 }));
@@ -237,15 +268,15 @@ router.post('/basket', (req, res) => {
         }
     })
 
-    console.log("length of array: "+axiosArray.length);
+    console.log("length of array: " + axiosArray.length);
 
     axios.all(axiosArray)
-        .then(axios.spread( (...responses) => {
+        .then(axios.spread((...responses) => {
             for (var i = 0; i < axiosArray.length; i++) {
-                if(responses[i].headers['content-disposition']) {
+                if (responses[i].headers['content-disposition']) {
                     var regexp = /filename=(.*)/;
                     zip.file(regexp.exec(responses[i].headers['content-disposition'])[1], Buffer.from(responses[i].data), {base64: false});
-                }else {
+                } else {
                     zip.file(names[i], Buffer.from(responses[i].data), {base64: false});
                 }
             }
@@ -260,11 +291,119 @@ router.post('/basket', (req, res) => {
                     res.status(200).download("./" + zipName, zipName);
                 });
         })).catch((err) => {
-            console.log(err);
-            return res.status(500).json({
-                msg: 'Error', err
-            });
+        console.log(err);
+        return res.status(500).json({
+            msg: 'Error', err
         });
+    });
+})
+/**
+ * POST /addToBasket
+ * download the basket
+ */
+/**
+ * @swagger
+ * /gfbio/addToBasket:
+ *   post:
+ *     description: adds dataset to the basket
+ *     tags: [Search GFBio - Elastic index]
+ *     summary: adds dataset to the basket
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: add to basket
+ *         description: adds dataset to the basket
+ *         schema:
+ *            type: object
+ *            required:
+ *              - userId
+ *              - basketContent
+ *            properties:
+ *              userId:
+ *                type: integer
+ *              basketContent:
+ *                type: object
+ *     responses:
+ *       201:
+ *         description: the item will be added to the database
+ */
+
+router.post('/addToBasket', (req, res) => {
+    basket.create(req, res);
+
+    // var sql = "INSERT INTO gfbio_basket (userid,basketcontent) VALUES(?,?)";
+    // pool.query(sql,[req.body.userId,req.body.basketContent], function (err, result, fields) {
+    //     if (err) throw new Error(err)
+    // })
+    res.status(200).send(req.body);
+})
+// router.post('/addToBasket', (req, res) => {
+//     var sql = "INSERT INTO basket (user_id,data_id,data) VALUES(?,?,?)";
+//     pool.query(sql, [req.body.userId, req.body.dataId, req.body.data], function (err, result, fields) {
+//         if (err) throw new Error(err)
+//     })
+//     res.status(200).send(req.body);
+// })
+// router.post('/deleteFromBasket', (req, res) => {
+//     var sql = "DELETE FROM basket WHERE data_id = (?) AND user_id = (?) LIMIT 1";
+//     pool.query(sql,[req.body.dataId, req.body.userId], function (err, result, fields) {
+//         if (err) throw new Error(err)
+//     })
+//     res.status(200).send(req.body);
+// })
+// router.post('/deleteAllBasket', (req, res) => {
+//     var sql = "DELETE FROM basket WHERE user_id = (?)";
+//     pool.query(sql,[req.body.userId], function (err, result, fields) {
+//         if (err) throw new Error(err)
+//     })
+//     res.status(200).send(req.body);
+// })
+// router.post('/readFromBasket', (req, res) => {
+//     var sql = "SELECT * FROM basket WHERE user_id = (?)";
+//     pool.query(sql,[req.body.userId], function (err, result, fields) {
+//         if (err) throw new Error(err)
+//         res.status(200).send(result);
+//     })
+// })
+
+/**
+ * POST /readFromBasket
+ * download the basket
+ */
+/**
+ * @swagger
+ * /gfbio/readFromBasket:
+ *   post:
+ *     description: returns the saved basket of the user
+ *     tags: [Search GFBio - Elastic index]
+ *     summary: returns the saved basket of the user
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: reads the basket
+ *         description: returns the saved basket of the user
+ *         schema:
+ *            type: object
+ *            required:
+ *              - userId
+ *            properties:
+ *              userId:
+ *                type: integer
+ *     responses:
+ *       201:
+ *         description: returns the saved basket of the user
+ */
+router.get('/readFromBasket', (req, res) => {
+    basket.findByUserId(req, res);
+    res.status(200).send(req.body);
+
+    // var sql = "SELECT * FROM gfbio_basket WHERE userid = (?) ORDER BY basketid DESC LIMIT 1";
+    // pool.query(sql,[req.body.userId], function (err, result, fields) {
+    //     if (err) throw new Error(err)
+    //     res.status(200).send(result);
+    // })
 })
 
 /**
@@ -272,51 +411,51 @@ router.post('/basket', (req, res) => {
  * semantic search service (based on query expansion)
  * search query is sent to GFBio TS first, only expanded result is forwarded to elasticsearch
  */
- /**
-   * @swagger
-   * /gfbio/semantic-search:
-   *   post:
-   *     description: search query is sent to GFBio TS first, only expanded result is forwarded to elasticsearch
-   *     tags: [Search GFBio - Elastic index]
-   *     summary: returns search results including semantic related results
-   *     consumes:
-   *       - application/json
-   *     parameters:
-   *       - in: body
-   *         name: queryterm
-   *         description: the query as string array
-   *         schema:
-   *            type: object
-   *            required:
-   *              - queryterm
-   *            properties:
-   *              queryterm:
-   *                type: array
-   *                items: 
-   *                   type: string
-   *                example: [honeybee,grassland]
-   *              from:
-   *                type: integer
-   *                description: from which page to start?
-   *                example: 0
-   *              size:
-   *                type: integer
-   *                description: how many datasets to return per page?
-   *                example: 10
-   *     responses:
-   *       201:
-   *         description: hits.hits contains an array with dataset objects matching the query.
-   */
+/**
+ * @swagger
+ * /gfbio/semantic-search:
+ *   post:
+ *     description: search query is sent to GFBio TS first, only expanded result is forwarded to elasticsearch
+ *     tags: [Search GFBio - Elastic index]
+ *     summary: returns search results including semantic related results
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: queryterm
+ *         description: the query as string array
+ *         schema:
+ *            type: object
+ *            required:
+ *              - queryterm
+ *            properties:
+ *              queryterm:
+ *                type: array
+ *                items:
+ *                   type: string
+ *                example: [honeybee,grassland]
+ *              from:
+ *                type: integer
+ *                description: from which page to start?
+ *                example: 0
+ *              size:
+ *                type: integer
+ *                description: how many datasets to return per page?
+ *                example: 10
+ *     responses:
+ *       201:
+ *         description: hits.hits contains an array with dataset objects matching the query.
+ */
 router.post('/semantic-search', (req, res) => {
 
     console.log('/semantic-search' + req.body);
-      /*e.g.,
-    * {
-      *	"queryterm":["grassland","honeybee"],
-      * 	"from":0,
-      * 	"size":10
-    * }
-    */
+    /*e.g.,
+  * {
+    *	"queryterm":["grassland","honeybee"],
+    * 	"from":0,
+    * 	"size":10
+  * }
+  */
 
     //expects keyword as string array
     const keywords = req.body.queryterm; //array with keywords
@@ -340,10 +479,10 @@ router.post('/semantic-search', (req, res) => {
         .then(axios.spread((...responses) => {
             for (i = 0; i < axiosArray.length; i++) {
                 var results = responses[i].data.results;
-				
+
                 results.forEach(function (item) {
-					var log = "";
-					//console.log(item);
+                    var log = "";
+                    //console.log(item);
                     for (const [key, value] of Object.entries(item)) {
 						if (item.sourceTerminology !== 'GEONAMES' && item.sourceTerminology !== 'RIVERS_DE'){
 							if (key === 'commonNames') {
@@ -352,14 +491,14 @@ router.post('/semantic-search', (req, res) => {
                               log += "----- commonName : " + value+"\n";
                             }
                             if (key === 'synonyms') {
-							  var keyword = value.toString().replace(/,/g,"\"|\"");
-                              allKeyWords = allKeyWords.concat("\""+keyword+"\"")
-                              log +="----- synonym : " + value+"\n";
+                                var keyword = value.toString().replace(/,/g, "\"|\"");
+                                allKeyWords = allKeyWords.concat("\"" + keyword + "\"")
+                                log += "----- synonym : " + value + "\n";
                             }
                             if (key === 'label') {
 
-                              allKeyWords = allKeyWords.concat("\""+value+"\"")
-                              log += "----- label : " + value+"\n";
+                                allKeyWords = allKeyWords.concat("\"" + value + "\"")
+                                log += "----- label : " + value + "\n";
                             }
 						 
                         }
@@ -370,10 +509,10 @@ router.post('/semantic-search', (req, res) => {
                     
 
 
-                    if (log.length>0){
-                      console.log("----- sourceTerminology : " + item.sourceTerminology);
-                      console.log("----- uri : " + item.uri);
-                      console.log(log);
+                    if (log.length > 0) {
+                        console.log("----- sourceTerminology : " + item.sourceTerminology);
+                        console.log("----- uri : " + item.uri);
+                        console.log(log);
                     }
                 });
             }
@@ -381,8 +520,8 @@ router.post('/semantic-search', (req, res) => {
 
             allKeyWords = allKeyWords.filter((a, b) => allKeyWords.indexOf(a) === b)
 
-			      var semanticTerms = allKeyWords.join("|");
-			      console.log(semanticTerms);
+            var semanticTerms = allKeyWords.join("|");
+            console.log(semanticTerms);
             //elastic call
             let filter = [];
             let from = 0;
@@ -432,21 +571,21 @@ router.post('/semantic-search', (req, res) => {
             var result = resp.data.hits.hits;
             for (var i = 0, iLen = result.length; i < iLen; i++) {
                 var highlight = result[i].highlight;
-				        //console.log(highlight);
-                if (highlight!=null){
-                   var highlightArr = extractHighlightedSearch(highlight);
-                   //console.log(highlightArr);
-                   var isAdded = false;
-                   for (var iHighlight = 0; iHighlight < highlightArr.length; iHighlight++){
-                      for (var iExtended = 0; iExtended < extendedTerms.length; iExtended++){
-                        if (extendedTerms[iExtended].toLowerCase() == highlightArr[iHighlight].toLowerCase()){
-                          isAdded = true;
+                //console.log(highlight);
+                if (highlight != null) {
+                    var highlightArr = extractHighlightedSearch(highlight);
+                    //console.log(highlightArr);
+                    var isAdded = false;
+                    for (var iHighlight = 0; iHighlight < highlightArr.length; iHighlight++) {
+                        for (var iExtended = 0; iExtended < extendedTerms.length; iExtended++) {
+                            if (extendedTerms[iExtended].toLowerCase() == highlightArr[iHighlight].toLowerCase()) {
+                                isAdded = true;
+                            }
                         }
-                      }
-                      //if (!isAdded && highlightArr[iHighlight].length>highlightLength){
-                      if (!isAdded){
-                        extendedTerms.push(highlightArr[iHighlight]);
-                      }
+                        //if (!isAdded && highlightArr[iHighlight].length>highlightLength){
+                        if (!isAdded) {
+                            extendedTerms.push(highlightArr[iHighlight]);
+                        }
                     }
                 }
             }
@@ -577,7 +716,7 @@ function getBooleanQuery(keyword, filterArray) {
                     "description^2.1", "description.folded",
                     "parameter.folded", "region.folded", "dataCenter.folded"];
             }
-			var keywordWithQuotes = keyword[i];
+            var keywordWithQuotes = keyword[i];
             boostedKeywords.push({
                 "simple_query_string": {
                     "query": keywordWithQuotes,
@@ -692,32 +831,34 @@ function getCompleteQuery(boostedQuery, iDisplayStart, iDisplayLength) {
 }
 
 /**
-** Description: collect all expanded terms found in the datasets (needs to be highlighted in text and listed as "expanded terms"), 
-** Input: array with fields containg html including <em>keyword</em>
-** Output: array with keywords
-**/
-function extractHighlightedSearch(highlightArray){
-	var jArr = [];
-	for(var fieldsKey in highlightArray) {
+ ** Description: collect all expanded terms found in the datasets (needs to be highlighted in text and listed as "expanded terms"),
+ ** Input: array with fields containg html including <em>keyword</em>
+ ** Output: array with keywords
+ **/
+function extractHighlightedSearch(highlightArray) {
+    var jArr = [];
+    for (var fieldsKey in highlightArray) {
         //console.log("key:"+fieldsKey+", value:"+highlightArray[fieldsKey]); 
-		var fieldsArray = highlightArray[fieldsKey];
-		for(j = 0; j < fieldsArray.length; j++ ){
-			var highlightedText = fieldsArray[j];
-			//console.log(highlightedText);
-			var startTag = highlightedText.indexOf("<em>");
-			var endTag = 0;
-			var taggedText = "";
-			while (startTag>=0){
-				endTag = highlightedText.indexOf("</em>",startTag);
-				taggedText = highlightedText.substring(startTag+4,endTag);
-				if (jArr.indexOf(taggedText)<0){
-					jArr.push(taggedText);
-				}
-				startTag = highlightedText.indexOf("<em>",endTag+5);
-			}
-		};
-	};
-	return jArr;
+        var fieldsArray = highlightArray[fieldsKey];
+        for (j = 0; j < fieldsArray.length; j++) {
+            var highlightedText = fieldsArray[j];
+            //console.log(highlightedText);
+            var startTag = highlightedText.indexOf("<em>");
+            var endTag = 0;
+            var taggedText = "";
+            while (startTag >= 0) {
+                endTag = highlightedText.indexOf("</em>", startTag);
+                taggedText = highlightedText.substring(startTag + 4, endTag);
+                if (jArr.indexOf(taggedText) < 0) {
+                    jArr.push(taggedText);
+                }
+                startTag = highlightedText.indexOf("<em>", endTag + 5);
+            }
+        }
+        ;
+    }
+    ;
+    return jArr;
 }
 
 module.exports = router;
