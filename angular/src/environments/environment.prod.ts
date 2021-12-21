@@ -1,11 +1,21 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://localhost:3000',
+  
+  Keycloak_Url: '',
+  Keycloak_RedirectUri: 'https://dev.gfbio.uni-jena.de/daisi',
+  Keycloak_Realm: '',
+  Keycloak_ClientId: '',
+  
+  apiUrl: 'https://dev.gfbio.uni-jena.de/daisi-api',
   context: '/gfbio',
   searchUrl: '/search',
   semSearchUrl: '/semantic-search',
   suggestUrl: '/suggest',
-  basketUrl: '/basket',
+  basketUrl: '/basketDownload',
+  addToBasketUrl: '/addToBasket',
+  deleteFromBasket: '/deleteFromBasket',
+  deleteAllBasket: '/deleteAllBasket',
+  readFromBasketUrl: '/api/baskets/user/',
   imagePath: 'assets/img/',
   vatImg: 'vat.png',
   semSearchImg: 'icon_semsearch3.png',

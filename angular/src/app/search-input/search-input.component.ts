@@ -3,7 +3,7 @@ import {NodeService} from '../services/remote/node.service';
 import {CommunicationService} from '../services/local/communication.service';
 import {faSearch} from '@fortawesome/free-solid-svg-icons';
 import {StartSearchingService} from '../services/local/start-searching.service';
-import { environment } from '../../environments/environment';
+import {environment} from '../../environments/environment';
 
 @Component({
     selector: 'app-search-input',
@@ -23,35 +23,44 @@ export class SearchInputComponent {
     result: any;
     windowSuggestion = false;
     semanticValue: boolean;
-    format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
-    alert = false;
+    formatSimpleSearch = /[!@#$%^&_+\-=\[\]{};':\\|,<>\/?]+/;
+    formatSemanticSearch = /[!@#$%^&_+\-=\[\]{};':"\\|,<>\/?*]+/;
+    alertSearch = false;
+    alertSemanticSearch = false;
 
-	semSearchImg: string = environment.imagePath + environment.semSearchImg;
-	
+    semSearchImg: string = environment.imagePath + environment.semSearchImg;
+
     // by entering a letter on the form, a request will be sent to the node server and then it will be sent to suggestion-window
     onWindowSuggestKey(value): void {
         if (value !== undefined) {
             (document.getElementById('searchField') as HTMLInputElement).value = value;
             this.searchKey = value;
+            this.alertSearch = this.formatSimpleSearch.test(this.searchKey);
+            this.alertSemanticSearch = false;
             this.startSearching(this.semanticValue);
             this.windowSuggestion = false;
         }
     }
 
-    // by clicking on the submit button, this method will be called
+    // by clicking on the search button, this method will be called
     onSearch(): void {
         this.semanticValue = false;
+        this.alertSearch = this.formatSimpleSearch.test(this.searchKey);
+        this.alertSemanticSearch = false;
         this.startSearching(this.semanticValue);
     }
 
+// by clicking on the semantic search button, this method will be called
     semantic(): void {
         this.semanticValue = true;
+        this.alertSearch = false;
+        this.alertSemanticSearch = this.formatSemanticSearch.test(this.searchKey);
         this.startSearching(this.semanticValue);
 
-        var subject = this.communicationService.getSearchKey();
+        const subject = this.communicationService.getSearchKey();
         subject.next(this.searchKey);
         subject.subscribe(value => {
-          this.searchKey = value;
+            this.searchKey = value;
         });
 
     }
@@ -64,8 +73,7 @@ export class SearchInputComponent {
     onSuggest(): void {
         this.nodeService.suggest(this.searchKey).subscribe(data => {
             this.communicationService.setSuggest(data.suggest[0].options);
-            this.alert = this.format.test(this.searchKey);
-            this.windowSuggestion = !this.format.test(this.searchKey);
+            this.windowSuggestion = data.suggest[0].options.length !== 0;
         });
     }
 

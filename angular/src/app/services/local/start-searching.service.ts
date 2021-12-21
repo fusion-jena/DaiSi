@@ -25,7 +25,6 @@ export class StartSearchingService {
       }
       body = JSON.stringify({queryterm: key, from,
           size: 10, filter: filters});
-      console.log(body);
       this.nodeService.search(
           urlIndex + urlTerm,
           body,

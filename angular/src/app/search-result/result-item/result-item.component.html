@@ -1,99 +1,75 @@
 <div>
     <div class="my-2">
-        <span class="labeling bg-label-blue" *ngIf="item.getYear()!== undefined" matTooltip="Publication year" matTooltipClass="result-item-tooltip">{{ item.getYear()}}</span>
-        
-		<span class="labeling bg-goldenrod" *ngIf="item.getDataCentre()== 'SNSB';else second" matTooltip="This dataset is provided by Staatliche Naturwissenschaftliche Sammlungen Bayerns &ndash; SNSB IT Center, M&uuml;nchen (SNSB)." matTooltipClass="result-item-tooltip">{{ item.getDataCentre()}}</span>
-		
-		<ng-template #second>
-			<span class="labeling bg-goldenrod" *ngIf="item.getDataCentre()== 'SGN';else third" matTooltip="This dataset is provided by Senckenberg Gesellschaft f&uuml;r Naturforschung  &ndash; Leibniz Institute Frankfurt (SGN)." matTooltipClass="result-item-tooltip">{{ item.getDataCentre()}}</span>
-		</ng-template>
-		
-		<ng-template #third>
-			<span class="labeling bg-goldenrod" *ngIf="item.getDataCentre()== 'BGBM';else fourth" matTooltip="This dataset is provided by Botanic Garden and Botanical Museum Berlin, Freie Universit&auml;t Berlin (BGBM)." matTooltipClass="result-item-tooltip">{{ item.getDataCentre()}}</span>
-		</ng-template>
-		
-		<ng-template #fourth>
-			<span class="labeling bg-goldenrod" *ngIf="item.getDataCentre()== 'MfN';else fifth" matTooltip="This dataset is provided by Leibniz Institute for Research on Evolution and Biodiversity, Berlin (MfN)." matTooltipClass="result-item-tooltip">{{ item.getDataCentre()}}</span>
-		</ng-template>
-		
-		<ng-template #fifth>
-			<span class="labeling bg-goldenrod" *ngIf="item.getDataCentre()== 'ZFMK';else six" matTooltip="This dataset is provided by Zoological Research Museum Alexander Koenig  &ndash; Leibniz Institute for Animal Biodiversity, Bonn (ZFMK)." matTooltipClass="result-item-tooltip">{{ item.getDataCentre()}}</span>
-		</ng-template>
-		
-		<ng-template #six>
-			<span class="labeling bg-goldenrod" *ngIf="item.getDataCentre()== 'SMNS';else seven" matTooltip="This dataset is provided by State Museum of Natural History Stuttgart (SMNS)." matTooltipClass="result-item-tooltip">{{ item.getDataCentre()}}</span>
-		</ng-template>
-		
-		<ng-template #seven>
-			<span class="labeling bg-goldenrod" *ngIf="item.getDataCentre()== 'PANGAEA';else eight" matTooltip="This dataset is provided by Data Publisher for Earth &amp; Environmental Science  (PANGAEA)." matTooltipClass="result-item-tooltip">{{ item.getDataCentre()}}</span>
-		</ng-template>
-		
-		<ng-template #eight>
-			<span class="labeling bg-goldenrod" *ngIf="item.getDataCentre()== 'DSMZ';else nine" matTooltip="This dataset is provided by Leibniz Institute DSMZ &ndash; German Collection of Microorganisms and Cell Cultures, Braunschweig (DSMZ)." matTooltipClass="result-item-tooltip">{{ item.getDataCentre()}}</span>
-		</ng-template>
-		
-		<ng-template #nine>
-			<span class="labeling bg-goldenrod" *ngIf="item.getDataCentre()== 'Gatersleben';else default" matTooltip="e!DAL&ndash;PGP &ndash; Plant Genomics and Phenomics Research Data Repository, Leibniz Institute of Plant Genetics and Crop Plant Research (IPK) Gatersleben" matTooltipClass="result-item-tooltip">{{ item.getDataCentre()}}</span>
-		</ng-template>
-		
-		<ng-template #default>
-			<span class="labeling bg-goldenrod" *ngIf="item.getDataCentre()!== ''" matTooltip="Publisher" matTooltipClass="result-item-tooltip">{{ item.getDataCentre()}}</span>
-		</ng-template>  
-		      
-		<span class="labeling bg-label-green" *ngIf="!item.getAccessType()" matTooltip="This dataset is open access. You can use primary data and metadata." matTooltipClass="result-item-tooltip">Open Access</span>
+		<span *ngFor="let label of item.getUpperLabels()">
+					<span class="labeling" [ngClass]="label.getColorClass()" [matTooltip]="label.getTooltip()"
+                          matTooltipClass="result-item-tooltip">{{ label.getInnerInfo()}}</span>
+		</span>
+
     </div>
 
 
-       <div class="d-flex justify-content-between line-bottom">
-		   <div class="pl-0 pb-3 d-flex">
-			   <div class="colorBox" [style.background-color]="item.getColor()" ></div>
-			   <div >
-				   <div [matTooltip]="item.coordinates()" matTooltipClass="result-item-tooltip" >
-					   <div *ngIf="item.getTitleUrl() === 'undefined'" [innerHTML]="item.getTitle()"></div>
-					   <a *ngIf="item.getTitleUrl() !== 'undefined'" href="{{item.getTitleUrl()}}" target="_blank"><div [innerHTML]="item.getTitle()"></div></a>
-				   </div>
-				   <div *ngFor="let des of item.getDescription(); let i=index">
-					   <app-description [des]="des"></app-description>
-				   </div>
-				   <div class="mt-2">
-					   <!--Grey elements in result item-->
-					   <div class="d-inline-block">
-						   <div *ngFor="let licence of item.getLicence()" class="d-inline-block pr-2 result-item-grey">
-							   <img *ngIf="licence !== 'Other' && licence !== 'All rights reserved'" src="{{imagePath}}{{licence+ '.png'}}"
-									class="license-img" matTooltip="License: {{ licence}}"
-									matTooltipClass="result-item-tooltip">
-							   <span *ngIf="licence === 'Other'" matTooltip="Custom license" matTooltipClass="result-item-tooltip"><svg width="2em" height="2em" viewBox="0 0 16 16"
-																																		class="bi bi-award" fill="currentColor"
-																																		xmlns="http://www.w3.org/2000/svg">
+    <div class="d-flex justify-content-between line-bottom">
+        <div class="pl-0 pb-3 d-flex">
+            <div class="colorBox" [style.background-color]="item.getColor()"></div>
+            <div>
+                <div [matTooltip]="item.coordinates()" matTooltipClass="result-item-tooltip">
+                    <div *ngIf="item.getTitleUrl() === 'undefined'" [innerHTML]="item.getTitle()"></div>
+                    <a *ngIf="item.getTitleUrl() !== 'undefined'" href="{{item.getTitleUrl()}}" target="_blank">
+                        <div [innerHTML]="item.getTitle()"></div>
+                    </a>
+                </div>
+                <div *ngFor="let des of item.getDescription(); let i=index">
+                    <app-description [des]="des"></app-description>
+                </div>
+                <div class="mt-2">
+                    <!--Grey elements in result item-->
+                    <div class="d-inline-block">
+                        <div *ngFor="let licence of item.getLicence()" class="d-inline-block pr-2 result-item-grey">
+                            <img *ngIf="licence !== 'Other' && licence !== 'All rights reserved'"
+                                 src="{{imagePath}}{{licence+ '.png'}}"
+                                 class="license-img" matTooltip="License: {{ licence}}"
+                                 matTooltipClass="result-item-tooltip">
+                            <span *ngIf="licence === 'Other'" matTooltip="Custom license"
+                                  matTooltipClass="result-item-tooltip"><svg width="2em" height="2em"
+                                                                             viewBox="0 0 16 16"
+                                                                             class="bi bi-award" fill="currentColor"
+                                                                             xmlns="http://www.w3.org/2000/svg">
   <path fill-rule="evenodd"
-		d="M9.669.864L8 0 6.331.864l-1.858.282-.842 1.68-1.337 1.32L2.6 6l-.306 1.854 1.337 1.32.842 1.68 1.858.282L8 12l1.669-.864 1.858-.282.842-1.68 1.337-1.32L13.4 6l.306-1.854-1.337-1.32-.842-1.68L9.669.864zm1.196 1.193l-1.51-.229L8 1.126l-1.355.702-1.51.229-.684 1.365-1.086 1.072L3.614 6l-.25 1.506 1.087 1.072.684 1.365 1.51.229L8 10.874l1.356-.702 1.509-.229.684-1.365 1.086-1.072L12.387 6l.248-1.506-1.086-1.072-.684-1.365z"/>
+        d="M9.669.864L8 0 6.331.864l-1.858.282-.842 1.68-1.337 1.32L2.6 6l-.306 1.854 1.337 1.32.842 1.68 1.858.282L8 12l1.669-.864 1.858-.282.842-1.68 1.337-1.32L13.4 6l.306-1.854-1.337-1.32-.842-1.68L9.669.864zm1.196 1.193l-1.51-.229L8 1.126l-1.355.702-1.51.229-.684 1.365-1.086 1.072L3.614 6l-.25 1.506 1.087 1.072.684 1.365 1.51.229L8 10.874l1.356-.702 1.509-.229.684-1.365 1.086-1.072L12.387 6l.248-1.506-1.086-1.072-.684-1.365z"/>
   <path d="M4 11.794V16l4-1 4 1v-4.206l-2.018.306L8 13.126 6.018 12.1 4 11.794z"/>
 </svg></span>
-							   <span *ngIf="licence === 'All rights reserved'" matTooltip="All rights reserved" matTooltipClass="result-item-tooltip">All rights reserved</span>
-						   </div>
-					   </div>
-					   <img *ngIf="item.getVat()" src="{{vatImg}}" class="vat-img pr-2"
-							[matTooltip]="item.transferToVat()" matTooltipClass="result-item-tooltip">&nbsp;
-					   <!--Blue elements in result item-->
-					   <span (click)="openDialog(itemId)" class="pr-2 result-item-blue" matTooltip="Show citation" matTooltipClass="result-item-tooltip"><span><fa-icon class="fa-sm"
-																																										  [icon]="faQuoteLeft"></fa-icon></span> Citation </span>
-					   <span *ngFor="let obj of item.getMultimediaObjs()" class="pr-2 vertical-middle">
-	                                <a *ngIf="obj.type === 'sound'" [href]="sanitize(obj.url)" target="_blank" matTooltip="This dataset provides a sound file." matTooltipClass="result-item-tooltip"><fa-icon
-											[icon]="faVolumeUp"></fa-icon> Sound </a>
-	                            <a *ngIf="obj.type === 'video'" [href]="sanitize(obj.url)" target="_blank" matTooltip="This dataset provides a video." matTooltipClass="result-item-tooltip"><fa-icon
-										[icon]="faVideo"></fa-icon> Video </a>
-	                            <a *ngIf="obj.type === 'picture'" [href]="sanitize(obj.url)" target="_blank" matTooltip="This dataset provides an image." matTooltipClass="result-item-tooltip"><fa-icon
-										[icon]="faImage"></fa-icon> Image </a>
+                            <span *ngIf="licence === 'All rights reserved'" matTooltip="All rights reserved"
+                                  matTooltipClass="result-item-tooltip">All rights reserved</span>
+                        </div>
+                    </div>
+                    <img *ngIf="item.getVat()" src="{{vatImg}}" class="vat-img pr-2"
+                         [matTooltip]="item.transferToVat()" matTooltipClass="result-item-tooltip">&nbsp;
+                    <!--Blue elements in result item-->
+                    <span (click)="openDialog(itemId)" class="pr-2 result-item-blue" matTooltip="Show citation"
+                          matTooltipClass="result-item-tooltip"><span><fa-icon class="fa-sm"
+                                                                               [icon]="faQuoteLeft"></fa-icon></span> Citation </span>
+                    <span *ngFor="let obj of item.getMultimediaObjs()" class="pr-2 vertical-middle">
+	                                <a *ngIf="obj.type === 'sound'" [href]="sanitize(obj.url)" target="_blank"
+                                       matTooltip="This dataset provides a sound file."
+                                       matTooltipClass="result-item-tooltip"><fa-icon
+                                            [icon]="faVolumeUp"></fa-icon> Sound </a>
+	                            <a *ngIf="obj.type === 'video'" [href]="sanitize(obj.url)" target="_blank"
+                                   matTooltip="This dataset provides a video." matTooltipClass="result-item-tooltip"><fa-icon
+                                        [icon]="faVideo"></fa-icon> Video </a>
+	                            <a *ngIf="obj.type === 'picture'" [href]="sanitize(obj.url)" target="_blank"
+                                   matTooltip="This dataset provides an image." matTooltipClass="result-item-tooltip"><fa-icon
+                                        [icon]="faImage"></fa-icon> Image </a>
 	                            </span>
 
-				   </div>
-			   </div>
+                </div>
+            </div>
 
-		   </div>
-		   <div>
-			   <div class="form-group form-check">
-				   <input (change)="checkBox(itemId, $event.target)" type="checkbox" class="regular-checkbox big-checkbox" [checked]="item.getCheckBox()">
-			   </div>
-		   </div>
-	   </div>
+        </div>
+        <div>
+            <div class="form-group form-check">
+                <input (change)="checkBox(itemId, $event.target)" type="checkbox" class="regular-checkbox big-checkbox"
+                       [checked]="item.getCheckBox()">
+            </div>
+        </div>
+    </div>
 </div>

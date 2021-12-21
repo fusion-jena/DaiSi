@@ -1,7 +1,7 @@
 import {Component, Input, OnInit, Output} from '@angular/core';
-import {CommunicationService} from '../services/local/communication.service';
+import {CommunicationService} from '../../services/local/communication.service';
 import {EventEmitter} from '@angular/core';
-import {Aggregations} from '../models/result/aggregations';
+import {Aggregation} from '../../models/result/aggregation';
 
 
 @Component({
@@ -10,7 +10,7 @@ import {Aggregations} from '../models/result/aggregations';
     styleUrls: ['./filter-box.component.css']
 })
 export class FilterBoxComponent implements OnInit {
-    @Input() filters: Aggregations;
+    @Input() filters: Aggregation;
     @Output() chosenFacet = new EventEmitter<any>();
     showMore = false;
 
@@ -21,8 +21,8 @@ export class FilterBoxComponent implements OnInit {
         const filter = this.communicationService.getFilter();
         if (filter !== undefined) {
             filter.forEach(result => {
-                this.filters.getBuckets().forEach(item => {
-                    this.checkFilter(item, result, this.filters.getName() + 'Facet');
+                this.filters.getFacets().forEach(item => {
+                    this.checkFilter(item, result, this.filters.getId() + 'Facet');
                 });
             });
         }

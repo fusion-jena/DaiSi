@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {CommunicationService} from '../services/local/communication.service';
+import {CommunicationService} from '../../services/local/communication.service';
 import * as _moment from 'moment';
 import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
 

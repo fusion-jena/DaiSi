@@ -1,6 +1,5 @@
-import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
 import {CommunicationService} from '../services/local/communication.service';
-import {Aggregations} from '../models/result/aggregations';
 import {Result} from '../models/result/result';
 import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
 

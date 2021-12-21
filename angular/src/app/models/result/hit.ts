@@ -1,26 +1,40 @@
 import {Citation} from './citation';
 import {Description} from './description';
 import {Linkage} from './linkage';
+import {Type} from 'class-transformer';
+import {UpperLabel} from './upperLabel';
 
+// every dataset
 export class Hit {
-    private title;
-    private titleUrl;
+    private title: string;
+    private id: string;
+    private titleUrl: string;
+    @Type(() => Description)
     private description: Array<Description>;
-    private dataCentre;
-    private year;
-    private accessType;
-    private licence;
-    private vat;
-    private multimediaObjs;
-    private latitude;
-    private longitude;
+    // the colorful labels on the top of every dataset
+    @Type(() => UpperLabel)
+    private upperLabels: Array<UpperLabel>;
+    private licence: Array<string>;
+    // every dataset can contain images or videos or sound tracks
+    private multimediaObjs: Array<any>;
+    private vat: boolean;
+    private latitude: string;
+    private longitude: string;
+    @Type(() => Citation)
     private citation: Citation;
-    private linkage;
-    private metadatalink;
-    private identifier;
-    private color;
-    private xml;
-    private checkbox;
+    // it contains the information related to the download of the dataset
+    @Type(() => Linkage)
+    private linkage: Linkage;
+    // it contains the information related to the download of the dataset
+    private metadatalink: string;
+    // it contains the information related to the download of the dataset
+    private identifier: string;
+    // every dataset can be shown on the map with an specific color
+    private color: string;
+    // most of the information of the dataset is in the xml
+    private xml: string;
+    // if this dataset has been selected by the user
+    private checkbox: boolean;
 
     getTitle(): string {
         return this.title;
@@ -28,6 +42,14 @@ export class Hit {
 
     setTitle(title: string): void {
         this.title = title;
+    }
+
+    getId(): string {
+        return this.id;
+    }
+
+    setId(id: string): void {
+        this.id = id;
     }
 
     getColor(): string {
@@ -86,28 +108,12 @@ export class Hit {
         this.description = description;
     }
 
-    getDataCentre(): string {
-        return this.dataCentre;
+    getUpperLabels(): Array<UpperLabel> {
+        return this.upperLabels;
     }
 
-    setDataCentre(dataCentre: string): void {
-        this.dataCentre = dataCentre;
-    }
-
-    getYear(): string {
-        return this.year;
-    }
-
-    setYear(year: string): void {
-        this.year = year;
-    }
-
-    getAccessType(): boolean {
-        return this.accessType;
-    }
-
-    setAccessType(accessType: boolean): void {
-        this.accessType = accessType;
+    setUpperLabels(upperLabels: Array<UpperLabel>): void {
+        this.upperLabels = upperLabels;
     }
 
     getLicence(): Array<string> {
@@ -173,8 +179,8 @@ export class Hit {
             return 'This dataset has no coordinates.';
         }
     }
-	
-	transferToVat(): string {
+
+    transferToVat(): string {
         if (this.getVat()) {
             return 'This dataset can be transfered to VAT.';
         }

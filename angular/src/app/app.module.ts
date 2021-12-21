@@ -1,5 +1,5 @@
 import {BrowserModule, Title} from '@angular/platform-browser';
-import {NgModule} from '@angular/core';
+import {NgModule, APP_INITIALIZER} from '@angular/core';
 
 import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
@@ -11,21 +11,24 @@ import {SearchResultComponent} from './search-result/search-result.component';
 import {FontAwesomeModule} from '@fortawesome/angular-fontawesome';
 import {PaginationComponent} from './pagination/pagination.component';
 import {SuggestionWindowComponent} from './suggestion-window/suggestion-window.component';
-import {FilterBoxComponent} from './filter-box/filter-box.component';
+import {FilterBoxComponent} from './filters/filter-box/filter-box.component';
 import {JwPaginationModule} from 'jw-angular-pagination';
 import {NgxSpinnerModule} from 'ngx-spinner';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {CitationComponent} from './citation/citation.component';
 import {FiltersComponent} from './filters/filters.component';
-import {OtherFiltersComponent} from './other-filters/other-filters.component';
+import {OtherFiltersComponent} from './filters/other-filters/other-filters.component';
 import 'reflect-metadata';
-import {FilterDatePickerComponent} from './filter-date-picker/filter-date-picker.component';
+import {FilterDatePickerComponent} from './filters/filter-date-picker/filter-date-picker.component';
 import {MaterialModule} from './material-module';
 import { BasketDialogComponent } from './basket-dialog/basket-dialog.component';
 import { ResultItemComponent } from './search-result/result-item/result-item.component';
 import { DescriptionComponent } from './search-result/description/description.component';
 import { ContextBoxComponent } from './context-box/context-box.component';
 import { MapComponent } from './map/map.component';
+
+import { KeycloakAngularModule, KeycloakService } from 'keycloak-angular';
+import { initializeKeycloak } from './utils/app.init';
 
 @NgModule({
     declarations: [
@@ -49,6 +52,7 @@ import { MapComponent } from './map/map.component';
     imports: [
         BrowserModule,
         AppRoutingModule,
+        KeycloakAngularModule,
         HttpClientModule,
         FormsModule,
         FontAwesomeModule,
@@ -58,7 +62,12 @@ import { MapComponent } from './map/map.component';
         ReactiveFormsModule,
         MaterialModule
     ],
-    providers: [Title],
+    providers: [{
+        provide: APP_INITIALIZER,
+        useFactory: initializeKeycloak,
+        multi: true,
+        deps: [KeycloakService]
+    }, Title],
     bootstrap: [AppComponent]
 })
 export class AppModule {

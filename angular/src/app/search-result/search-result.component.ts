@@ -1,26 +1,56 @@
-import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
 import {Result} from '../models/result/result';
 import {BasketDialogComponent} from '../basket-dialog/basket-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
+import {NodeService} from '../services/remote/node.service';
+import {Hit} from '../models/result/hit';
+import {plainToClass} from 'class-transformer';
+import {KeycloakService} from 'keycloak-angular';
 
 @Component({
     selector: 'app-search-result',
     templateUrl: './search-result.component.html',
     styleUrls: ['./search-result.component.css']
 })
-export class SearchResultComponent{
+export class SearchResultComponent implements OnInit, OnChanges {
     semantic: boolean;
     @Input() result = new Result();
-    basketValues = [];
+    basketValues: Array<Hit> = [];
     @Output() from = new EventEmitter<any>();
     @Output() mapItem = new EventEmitter<any>();
-
     popoverVisible = '';
+    user;
 
-    constructor(public dialog: MatDialog) {
+    constructor(public dialog: MatDialog, private nodeService: NodeService, private keycloakService: KeycloakService) {
     }
 
-    checkBox(item): void {
+    ngOnInit(): void {
+        this.user = this.keycloakService.getUsername();
+        if (this.user !== undefined){
+            this.nodeService.readFromBasket(this.user).subscribe(result => {
+                if (result.length !== 0) {
+                    const basket = JSON.parse(result[0]?.basketcontent)?.selected;
+                    basket.forEach(item => {
+                        const hit: Hit = plainToClass(Hit, item);
+                        this.basketValues.push(hit);
+                    });
+                    this.mapItem.emit(this.basketValues);
+                }
+            });
+        } 
+         else
+        {
+            this.user = null;
+        }
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes?.result?.currentValue !== changes?.result?.previousValue) {
+            this.controlCheckboxes(this.basketValues);
+        }
+    }
+
+    checkBoxClick(item: Hit): void {
         if (item.getCheckBox()) {
             this.basketValues.push(item);
         } else {
@@ -35,14 +65,26 @@ export class SearchResultComponent{
             data: this.basketValues,
             disableClose: true
         });
-        dialogRef.afterClosed().subscribe(result => {
-            this.result.getHits().forEach(value => {
-                const index = result.indexOf(value);
-                if (index <= -1) {
-                    value.setCheckbox(false);
+        dialogRef.afterClosed().subscribe(basketValues => {
+
+            this.basketValues = basketValues[0];
+            this.result.getHits().forEach(resultValue => {
+                resultValue.setCheckbox(false);
+            });
+            this.controlCheckboxes(this.basketValues);
+            this.mapItem.emit(this.basketValues);
+        });
+    }
+
+    controlCheckboxes(basketValues): void {
+        basketValues.forEach(basketValue => {
+            const basketId = basketValue.getId();
+            this.result.getHits().forEach(resultValue => {
+                const resultId = resultValue.getId();
+                if (resultId === basketId) {
+                    resultValue.setCheckbox(true);
                 }
             });
-            this.mapItem.emit(this.basketValues);
         });
     }
 

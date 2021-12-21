@@ -2,6 +2,10 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {NodeService} from '../services/remote/node.service';
 import {environment} from '../../environments/environment';
+import {Basket} from '../models/basket';
+import {Hit} from '../models/result/hit';
+import {plainToClass} from 'class-transformer';
+import {KeycloakService} from 'keycloak-angular';
 
 @Component({
     selector: 'app-basket-dialog',
@@ -21,21 +25,26 @@ export class BasketDialogComponent implements OnInit {
     textTooltipBasketRemove = environment.textTooltipBasketRemove;
     textTooltipBasketEmpty = environment.textTooltipBasketEmpty;
     spinner = false;
+    savedData: Array<Hit> = [];
+    user;
 
     constructor(
         public dialogRef: MatDialogRef<BasketDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) public data, private nodeService: NodeService) {
+        @Inject(MAT_DIALOG_DATA) public data, private nodeService: NodeService, private keycloakService: KeycloakService) {
     }
 
     ngOnInit(): void {
-
+        this.initializeUserOptions();
     }
 
     remove(item): void {
         const index = this.data.indexOf(item);
-
         if (index >= 0) {
+            console.log(this.savedData);
+            console.log(this.data);
             this.data.splice(index, 1);
+            console.log(this.savedData);
+            console.log(this.data);
         }
     }
 
@@ -44,9 +53,15 @@ export class BasketDialogComponent implements OnInit {
         const basket = {
             basket: this.data
         };
-        this.nodeService.basket(basket).subscribe(data => this.downloadSuccess(data),
-            err => alert(environment.textAlertBasketErrorDownload));
+        this.nodeService.basketDownload(basket).subscribe(data => this.downloadSuccess(data),
+            err => this.downloadFailed());
 
+
+    }
+
+    downloadFailed(): void {
+        alert(environment.textAlertBasketErrorDownload);
+        this.spinner = false;
     }
 
     downloadSuccess(blob): void {
@@ -57,7 +72,44 @@ export class BasketDialogComponent implements OnInit {
         URL.revokeObjectURL(objectUrl);
         this.spinner = false;
     }
+
     emptyBasket(): void {
-        this.data.splice(0, this.data.length);
+        const r = confirm('Are you sure that you want to empty the basket?');
+        if (r === true) {
+            this.data.splice(0, this.data.length);
+            this.saveBasket();
+        }
+    }
+
+    saveBasket(): void {
+        const basket = new Basket();
+        basket.setBasketContent(JSON.stringify({selected: this.data}));
+        basket.setUserId(this.user);
+        this.nodeService.addToBasket(basket).subscribe();
+        this.savedData = this.data.slice(0);
+    }
+
+    checkSaveButton(): boolean {
+        if (this.data.length === 0) {
+            return true;
+        }
+        return JSON.stringify(this.data) === JSON.stringify(this.savedData);
+    }
+
+    private initializeUserOptions(): void {
+        this.user = this.keycloakService.getUsername();
+        if (this.user !== undefined) {
+            this.nodeService.readFromBasket(this.user).subscribe(result => {
+                if (result.length !== 0) {
+                    const basket = JSON.parse(result[0]?.basketcontent)?.selected;
+                    basket.forEach(item => {
+                        const hit: Hit = plainToClass(Hit, item);
+                        this.savedData.push(hit);
+                    });
+                }
+            });
+        }else{
+            this.user = null;
+        }
     }
 }

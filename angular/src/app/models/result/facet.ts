@@ -1,6 +1,10 @@
-export class Bucket {
+// checkbox item in the filter box
+export class Facet {
+    // the mane of the facet
     private key: string;
+    // the number of the available datasets after applying the facet
     private docCount: number;
+    // if the facet is activated (by default, it is false)
     private checked = false;
 
     getKey(): string {

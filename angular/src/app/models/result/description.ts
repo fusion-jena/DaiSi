@@ -1,6 +1,9 @@
+// the descriptions after the title of the dataset
 export class Description {
-    private title;
-    private value;
+    // the key of the description
+    private title: string;
+    // the description value
+    private value: string;
 
     getTitle(): string {
         return this.title;

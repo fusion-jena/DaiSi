@@ -30,7 +30,6 @@ export class PaginationComponent implements OnChanges {
     ngOnChanges(changes: SimpleChanges): void {
         if (changes?.result?.currentValue?.getTotalNumber() !== changes?.result?.previousValue?.getTotalNumber()){
             if (!isNaN(changes?.result?.currentValue?.getTotalNumber())){
-                console.log(changes?.result?.currentValue?.getTotalNumber());
                 this.items = Array(changes?.result?.currentValue?.getTotalNumber()).fill(0);
                 this.entries = changes?.result?.currentValue?.getTotalNumber();
             }

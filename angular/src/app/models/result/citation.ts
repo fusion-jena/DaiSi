@@ -1,11 +1,16 @@
-export class Citation{
-    private title;
-    private creator;
-    private date;
-    private source;
-	private DOI;
-	private dataCenter;
-	
+// the citation for every dataset
+export class Citation {
+    // the title of the dataset
+    private title: string;
+    // the name of the authors
+    private creator: Array<string>;
+    // the publication date
+    private date: string;
+    private source: string;
+    // the url
+    private DOI: string;
+    private dataCenter: string;
+
     getTitle(): string {
         return this.title;
     }
@@ -13,6 +18,7 @@ export class Citation{
     setTitle(title: string): void {
         this.title = title;
     }
+
     getCreator(): Array<string> {
         return this.creator;
     }
@@ -20,6 +26,7 @@ export class Citation{
     setCreator(creator: Array<string>): void {
         this.creator = creator;
     }
+
     getDate(): string {
         return this.date;
     }
@@ -27,7 +34,8 @@ export class Citation{
     setDate(date: string): void {
         this.date = date;
     }
-	getPubYear(): string {
+
+    getPubYear(): string {
         return this.date?.substring(0, 4);
     }
 
@@ -38,19 +46,21 @@ export class Citation{
     setSource(source: string): void {
         this.source = source;
     }
-	getDOI(): string {
+
+    getDOI(): string {
         return this.DOI;
     }
 
     setDOI(DOI: string): void {
         this.DOI = DOI;
     }
-	getDataCenter(): string {
+
+    getDataCenter(): string {
         return this.dataCenter.toUpperCase();
     }
 
     setDataCenter(dataCenter: string): void {
         this.dataCenter = dataCenter;
     }
-	
+
 }

@@ -1,7 +1,8 @@
+// it contains the information related to the download of the dataset
 export class Linkage {
-    private data;
-    private metadata;
-    private multimedia;
+    private data: string;
+    private metadata: string;
+    private multimedia: Array<any>;
 
     getData(): string {
         return this.data;

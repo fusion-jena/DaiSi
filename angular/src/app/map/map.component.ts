@@ -35,14 +35,16 @@ export class MapComponent implements AfterViewInit, OnChanges {
 
     ngOnChanges(changes: SimpleChanges): void {
         let lastMarker;
-        if (this.layerGroup !== undefined){
+        if (this.layerGroup !== undefined) {
             this.map.removeLayer(this.layerGroup);
         }
         if (this.markers && this.markers?.items?.length !== 0) {
             const coordinates = [];
             this.markers.items.forEach(item => {
-                const coordinate = [item.getLatitude(), item.getLongitude(), item.getColor()];
-                coordinates.push(coordinate);
+                if (item.getLatitude() !== undefined && item.getLongitude() !== undefined) {
+                    const coordinate = [item.getLatitude(), item.getLongitude(), item.getColor()];
+                    coordinates.push(coordinate);
+                }
             });
             const layerGroup = L.layerGroup().addTo(this.map);
             coordinates.forEach((value, i) => {
@@ -55,7 +57,9 @@ export class MapComponent implements AfterViewInit, OnChanges {
                 layerGroup.addLayer(circle);
                 lastMarker = [coordinates[i][0], coordinates[i][1]];
             });
-            this.map.panTo(new L.LatLng(lastMarker[0], lastMarker[1]));
+            if (lastMarker !== undefined) {
+                this.map.panTo(new L.LatLng(lastMarker[0], lastMarker[1]));
+            }
             this.layerGroup = layerGroup;
         }
     }

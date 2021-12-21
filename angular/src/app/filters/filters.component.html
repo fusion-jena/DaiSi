@@ -21,23 +21,6 @@
                                 </mat-chip-list>
                             </div>
                             <div *ngFor="let item of result?.getAggregations(); let i=index">
-                                <!--                    <div class="card mb-3">-->
-                                <!--                        <div class="card-header">-->
-                                <!--							<div class="row">-->
-                                <!--							    <div class="col-1 col-md-1">-->
-                                <!--							      <mat-icon class="filterIcon">{{item.getIcon()}}</mat-icon>-->
-                                <!--							    </div>-->
-                                <!--							    <div class="col-auto col-md-auto">-->
-                                <!--							     {{item.getTitle()}}-->
-                                <!--							    </div>-->
-                                <!--							  </div>-->
-
-                                <!--                        </div>-->
-                                <!--                        <div class="card-body">-->
-                                <!--                            <app-filter-box [filters]="item"-->
-                                <!--                                            (chosenFacet)="sendFilter($event)"></app-filter-box>-->
-                                <!--                        </div>-->
-                                <!--                    </div>-->
                                 <mat-accordion>
                                     <mat-expansion-panel class="mt-3" [expanded]="openChart">
                                         <mat-expansion-panel-header class="card-header" style="height: 40px">
@@ -81,22 +64,6 @@
 
                                     </mat-expansion-panel>
                                 </mat-accordion>
-                                <!--                    <div class="card mb-3">-->
-                                <!--                        <div class="card-header">-->
-                                <!--                          <div class="row">-->
-                                <!--							    <div class="col-1 col-md-1">-->
-                                <!--							      <mat-icon class="filterIcon">{{item.icon}}</mat-icon> -->
-                                <!--								</div>-->
-                                <!--							    <div class="col-auto col-md-auto">-->
-                                <!--								{{item.title}} -->
-                                <!--								</div>-->
-                                <!--						  </div>-->
-                                <!--                        </div>-->
-                                <!--                        <div class="card-body">-->
-                                <!--                            <app-other-filters [filter]="item.parameters" [filterValues] = "filterValues"-->
-                                <!--                                               (chosenFilter)="sendFilter($event)"></app-other-filters>-->
-                                <!--                        </div>-->
-                                <!--                    </div>-->
                             </div>
                             <div *ngFor="let datePicker of result?.getDatePickers()">
                                 <app-filter-date-picker [datePicker]="datePicker" [filters] = "chosenFilter" [filterValues] = "filterValues"

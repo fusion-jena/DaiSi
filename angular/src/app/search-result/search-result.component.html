@@ -27,7 +27,7 @@
     <ngx-spinner></ngx-spinner>
     <div *ngIf="result?.getHits()?.length!==0">
         <div *ngFor="let item of result?.getHits(); let i=index" class="pt-1">
-			<app-result-item [item]="item" [itemId]="i" (checkBoxItem)="checkBox($event)"></app-result-item>
+			<app-result-item [item]="item" [itemId]="i" (checkBoxItem)="checkBoxClick($event)"></app-result-item>
             
         </div>
     </div>
