@@ -38,14 +38,19 @@ Please report bugs and issues in the GitHub issue tracker.
 
 ## Changelog
 
-21.12.2021 v0.5
-*
+### 21.12.2021 v0.5
 
-29.07.2021 v0.4_beta
+* integration of keycloak authentication service (angular & nodejs)
+* rest api for basket(s) access
+* persistent storage of baskets (via mysql/mariadb)
+
+### 29.07.2021 v0.4_beta
+
 * Terminology widget added (info box in semantic search - explanation on expanded terms)
 * dataset basket improvements: spinner added (creation of zip file can take some seconds), 'empty basket' function
 
-07.07.2021 v0.3
+### 07.07.2021 v0.3
+
 * minimap added (select a dataset and if coordinates are present the geographic location is shown on the map)
 * dataset basket with download function (select datasets, open the basket and download all files as zip)
 * related datasets/publications are displayed
@@ -53,7 +58,7 @@ Please report bugs and issues in the GitHub issue tracker.
 * bugfix semantic search: expanded terms are only displayed when they occur in the dataset
 * config variables for Node and Angular are now provided in separate environment files
 
-26.03.2021 v0.2
+### 26.03.2021 v0.2
 
 * color and css revised
 * additional information on demand (mouseover) added
@@ -61,7 +66,10 @@ Please report bugs and issues in the GitHub issue tracker.
 * bugfix semantic search - expanded terms highlighted in title and description
 * collapse/expand for longer descriptions and parameters
 
-05.03.2021 v0.1
+### 05.03.2021 v0.1
+
+* tba
 
 ## License
+
 [Dai:Si] is distributed under the terms of the GNU LGPL v3.0. (https://www.gnu.org/licenses/lgpl-3.0.en.html) 
