@@ -10,10 +10,10 @@ export function initializeKeycloak(keycloak: KeycloakService): () => Promise<boo
                 clientId: environment.Keycloak_ClientId
             },
             initOptions: {
-                onLoad: 'check-sso',
+                //onLoad: 'check-sso',
                 checkLoginIframe: true,
                 checkLoginIframeInterval: 25
             },
-            loadUserProfileAtStartUp: true
+            //loadUserProfileAtStartUp: true
         });
 }
