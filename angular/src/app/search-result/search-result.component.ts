@@ -20,28 +20,35 @@ export class SearchResultComponent implements OnInit, OnChanges {
     @Output() mapItem = new EventEmitter<any>();
     popoverVisible = '';
     user;
+    basketId;
 
     constructor(public dialog: MatDialog, private nodeService: NodeService, private keycloakService: KeycloakService) {
     }
 
     ngOnInit(): void {
-        this.user = this.keycloakService.getUsername();
-        if (this.user !== undefined){
-            this.nodeService.readFromBasket(this.user).subscribe(result => {
-                if (result.length !== 0) {
-                    const basket = JSON.parse(result[0]?.basketcontent)?.selected;
-                    basket.forEach(item => {
-                        const hit: Hit = plainToClass(Hit, item);
-                        this.basketValues.push(hit);
-                    });
-                    this.mapItem.emit(this.basketValues);
-                }
-            });
-        } 
-         else
-        {
+        try{
+            this.user = this.keycloakService.getUsername();
+            if (this.user !== undefined){
+                this.nodeService.readFromBasket(this.user).subscribe(result => {
+                    if (result.length !== 0) {
+                        const basket = JSON.parse(result[0]?.basketcontent)?.selected;
+                        basket.forEach(item => {
+                            const hit: Hit = plainToClass(Hit, item);
+                            this.basketValues.push(hit);
+                        });
+                        this.mapItem.emit(this.basketValues);
+                    }
+                });
+            } 
+             else
+            {
+                this.user = null;
+            }
+        }catch{
             this.user = null;
         }
+        
+        this.basketId = null;
     }
 
     ngOnChanges(changes: SimpleChanges): void {

@@ -9,16 +9,28 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.TEXT
     },
     content: {
-      type: Sequelize.TEXT
+      type: Sequelize.JSON,
+      get: function () {
+        return JSON.parse(this.getDataValue('content'));
+      },
     },
     query: {
-      type: Sequelize.TEXT
+      type: Sequelize.JSON,
+      get: function () {
+        return JSON.parse(this.getDataValue('query'));
+      },
     },
     keywords: {
-      type: Sequelize.TEXT
+      type: Sequelize.JSON,
+      get: function () {
+        return JSON.parse(this.getDataValue('keywords'));
+      },
     },
     filters: {
-      type: Sequelize.TEXT
+      type: Sequelize.JSON,
+      get: function () {
+        return JSON.parse(this.getDataValue('filters'));
+      },
     }
   });
 

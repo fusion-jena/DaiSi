@@ -1,48 +1,42 @@
-# [Dai:Si] - Angular (Frontend)
+# Dataset Search - Angular (Frontend)
 
-The Angular frontend serves as user interface of <Dai:Si>.
-
-## Installation and Configuration
-
-Install all necessary dependencies: Navigate to the angular folder and run
-
-```npm install```
-
-The src/environment folder contains two files for local settings and adjustments.
-
-`environment.ts` - environment file for development
-
-`environment.prod.ts` - environment file for production
-
+The Angular frontend serves as user interface of the <Dataset Search UI> application.
 
 ## Components
 
 The UI consists of multiple components that communicate with each other via internal services.
 
-**Search Input** (search input field)
+#### Search Input
 
-**Search Result** (search result)
+#### Search Result
 
-**Filters** (aggregations and facets, date pickers)
+#### Filters
 
-**Paging** (paging component)
+#### Paging
 
-**Suggestion** (auto-completion)
+#### Suggestion 
 
-**Citation** (citation dialog)
+#### Citation
 
-**Services** (local and remote services for inter component communication as well as communication with the backend, e.g., search indexes)
+#### Services
 
-## Adding and mapping a new index
+* local and remote services
+
+## CSS adaptions
+
+* create a new css file and add it to angular.json under the 'styles.css'. Overwrite all css classes you want to change. 
+
+## Adding new index
 
 Please follow the instructions below if you want to use [Dai:Si] for your own search index. Make sure that your index is available 
 
-1. Create a new component for your index, e.g., ``ng generate component myIndex``
-2. Go to `app.component.ts` and add a new entry to the array of 'indexes' with a title and a URL (e.g., 'myIndex', '/myIndex' ). Go to the `app-routing.module.ts`, import your newly created component and add an entry to the routes array, e.g.,
+1. Create a new component for your index
+2. Go to `app.component.ts` and add a new entry to the array of 'indexes' with a title and a URL (e.g., 'myNewIndex', '/myNewIndex' ).
+3. Go to the `app-routing.module.ts`, import your newly created component and add an entry to the routes array, e.g.,
 
 ``const routes: Routes = [
   { path: '', component: GfbioComponent },
-  { path: '/myIndex', component: MyIndex }
+  { path: '/myNewIndex', component: MyNewIndex }
 ];
 ``
 
@@ -50,12 +44,12 @@ Please follow the instructions below if you want to use [Dai:Si] for your own se
 
 ``<app-search-result [result]="result" (basket)="checkBox($event)" (from)="paginationClicked($event)"></app-search-result>``
 
-Then go to the `*.ts` file and implement from "SearchResult"(example:go to the `gfbio.component.ts`). You need to pass the content information through the "result" parameter (subscribed to the `communicationService.getResult()`). If a user clicks on an entry in the pagination component, you can get the click's action and the page number from the "paginationClicked" function. If the user clicks a check box in the results, you can get the click's action and the checked results, from "checkBox" function. If you need the filters component, you need to add the 
+5. Then go to the `*.ts` file and implement from "SearchResult"(example:go to the `gfbio.component.ts`). You need to pass the content information through the "result" parameter (subscribed to the `communicationService.getResult()`). If a user clicks on an entry in the pagination component, you can get the click's action and the page number from the "paginationClicked" function. If the user clicks a check box in the results, you can get the click's action and the checked results, from "checkBox" function. If you need the filters component, you need to add the 
 
 ``<app-filters [result]="result" (filters)="filterSubmitted($event)" [resetFilters]="resetFilters"></app-filters>``
 
 Again you need to pass the results through a "result" parameter. If you need to clean the filters (example: new search key) by an action, 
-you need to pass it by ``resetFilters= true``. You can get the clicked filters by the 'filterSubmitted' function.
+you need to pass it by `resetFilters= true`. You can get the clicked filters by the "filterSubmitted" function.
 
 If you need the search-input component, add 
 
@@ -63,22 +57,9 @@ If you need the search-input component, add
 
 You can add the elements that you want to put into the basket by `basketValues`. If the user clicks on the basket, the action can be received by the `basketChecked` function. If the user clicks on one of the search buttons (search, semantic), the action can be received by the `searchKeySubmitted` function. The input of the function is an array. The first item is the search key and the second one is a boolean value, which shows if the search is semantic or not. Now you have all the information you need for sending the http request (such as search keys, filters, pagination, ...) - we are ready to send the request.
 
-5. To send a request, you need a service which is responsible to map the results of the http request to the result object which is used in the search-result component to show the information. Create a new service under the services/local directory (example: `gfbio-preprocess-data.service.ts`. Go to the component that you want to send the request and inject the service in the constructor, e.g., "NodeService".
+6. To send a request, you need a service which is responsible to map the results of the http request to the result object which is used in the search-result component to show the information. Create a new service under the services/local directory (example: `gfbio-preprocess-data.service.ts`. Go to the component that you want to send the request and inject the service in the constructor, e.g., "NodeService".
 
-6. When calling the "search" method in the "NodeService", you need to pass 4 parameters (urlTerm, body, the service for mapping the result, parameters that you need in the mapping service). Check the example in the `Start-searching.Service.ts`.
-
-
-# Data Model
-
-The underlying data model is depicted in the diagram below. A search result consists of two arrays with hits and aggregations. An aggregation can have multiple facets. A hit consists of UpperLabels (the labels presented on top of every dataset), a Description, a Citation (the citation dialog box) and a Linkage (to link multimedia files). If a field in the data model is not filled it can not be displayed. Please map all your index fields to the respective attributes or classes in the ``<yourIndex>-preprocess-data.service.ts`` file.
-
-![Diagram](src/assets/img/diagram.png)
-
-After retrieving the results, it is mapped to the result class.
-<br />The orange rectangels are classes.
-<br />The blue ellipses are attributes.
- 
-
+7. When calling the "search" method in the "NodeService", you need to pass 4 parameters (urlTerm, body, the service for mapping the result, parameters that you need in the mapping service). Check the example in the `Start-searching.Service.ts`.
 
 ## General Angular instructions
 
@@ -108,9 +89,5 @@ Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protrac
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
 
-## CSS adaptions
-
-* create a new css file and add it to angular.json under the 'styles.css'. Overwrite all css classes you want to change. 
-
 ## License
-<Dai:Si> is distributed under the terms of the GNU LGPL v3.0. (https://www.gnu.org/licenses/lgpl-3.0.en.html) 
+<Dataset Search UI> is distributed under the terms of the GNU LGPL v3.0. (https://www.gnu.org/licenses/lgpl-3.0.en.html) 

@@ -9,6 +9,7 @@ export class Hit {
     private title: string;
     private id: string;
     private titleUrl: string;
+    private titleTooltip: string;
     @Type(() => Description)
     private description: Array<Description>;
     // the colorful labels on the top of every dataset
@@ -20,6 +21,7 @@ export class Hit {
     private vat: boolean;
     private latitude: string;
     private longitude: string;
+    private vatTooltip: string;
     @Type(() => Citation)
     private citation: Citation;
     // it contains the information related to the download of the dataset
@@ -132,6 +134,14 @@ export class Hit {
         this.vat = vat;
     }
 
+    getVatTooltip(): string {
+        return this.vatTooltip;
+    }
+
+    setVatTooltip(vatTooltip: string): void {
+        this.vatTooltip = vatTooltip;
+    }
+
     getCitation(): Citation {
         return this.citation;
     }
@@ -164,25 +174,19 @@ export class Hit {
         this.longitude = longitude;
     }
 
+    getTitleTooltip(): string {
+        return this.titleTooltip;
+    }
+
+    setTitleTooltip(titleTooltip: string): void {
+        this.titleTooltip = titleTooltip;
+    }
+
     getCheckBox(): boolean {
         return this.checkbox;
     }
 
     setCheckbox(checkbox: boolean): void {
         this.checkbox = checkbox;
-    }
-
-    coordinates(): string {
-        if (this.getLatitude !== undefined && this.getLongitude() !== undefined) {
-            return 'This dataset has coordinates: min latitude: ' + this.getLatitude() + ', max longitude: ' + this.getLongitude();
-        } else {
-            return 'This dataset has no coordinates.';
-        }
-    }
-
-    transferToVat(): string {
-        if (this.getVat()) {
-            return 'This dataset can be transfered to VAT.';
-        }
     }
 }

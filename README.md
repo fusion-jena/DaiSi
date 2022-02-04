@@ -1,75 +1,115 @@
-# [Dai:Si] - A modular framework for Dataset Search
+# Dai:Si
 
-This repository provides the source code for [Dai:Si] - a frontend framework for querying a dataset search index. The name is an abbrevation of 'Dataset Search' in its phonetic spelling.
-[Dai:Si] consists of two parts: a backend server (Node Server) and a frontend (Angular application). 
-The Node middleware server handles the index requests and provides a convenient API for the frontend - a modular Angular app that can be easily adjusted for a specific domain. [Dai:Si] also provides a semantic search for biological datasets. 
+First, the source code contains sensitive data (credentials) for the authentication provider at the GWDG. We need to clean that before publishing this. If you want to get this repository running, you need to modify one file within your operating system, as well as the script of Angular deployment.
 
-* [Angular app] 
-* [Node Server] 
+## Pre-Requisites & Local Deployment
 
-[Angular app]: https://github.com/fusion-jena/DatasetSearchUI/tree/master/angular
-[Node Server]: https://github.com/fusion-jena/DatasetSearchUI/tree/master/node
+Regardless of the operating system, certain programs or libraries are required for the operation of Dai:Si. The following section deals with these dependencies and describes the setup with respect to a Windows-based computer/server.
 
-## Demo
+### NodeJS
 
-A live demo is available here: https://dev.gfbio.uni-jena.de/daisi/
+Please go to [NodeJS](https://nodejs.org/dist/), download and install an appropriate version of NodeJS. For comparison, please have a look at the current version which I use. Additionally, with the following command, you are able to verify the version you have installed.
 
-The Node Server and its API is also available: https://dev.gfbio.uni-jena.de/daisi-api/api-docs/
+> $ node --version \
+> 14.18.1
 
-## How to setup Dai:Si for your own index
+Besides NodeJS, npm is also installed. You can also easily check the version.
 
-Setting up Dai:Si for your own search index comprises a few steps that are additionally described in the [Node Server] and the [Angular app] sections.
+> $ npm --version \
+> 6.14.15
+
+You would have to do this before the first execution anyway.
+
+> $ npm i
+
+Please use the following command to run the application.
+
+> node app.js
+
+### Angular
+
+Based on the project, all necessary packages should be fetched. To do this, you need to run the following command in the appropriate folder. You would have to do this before the first execution anyway.
+
+> $ npm i
+
+Please use the following command to run the application.
+
+> ng serve --open --disable-host-check
+
+### MySQL / MariaDB
+
+Please have a look at the section [XAMPP](#XAMPP).
+
+### XAMPP
+
+If you are using a Windows operating system, installing XAMPP is worthwhile for several reasons. First, the package includes an instance of MySQL/MariaDB with appropriate tooling (e.g. phpMyAdmin,...).
+
+On the other hand Apache is included within XAMPP, which can be used as a reverse proxy to run both applications (angular & nodejs). Please open the file "httpd-vhosts.conf" within your XAMPP environment ({path/to/xampp}/apache/conf/extra/httpd-vhosts.conf) and add the following lines to the end of the file.
+
+```config
+<VirtualHost *:80>
+
+ServerName dev.gfbio.uni-jena.de
+ServerAdmin sven.thiel@uni-jena.de
+
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+</VirtualHost>
+
+<VirtualHost *:443>
+
+DocumentRoot "C:/xampp/htdocs"
+ServerName dev.gfbio.uni-jena.de
+SSLEngine on
+SSLCertificateFile "C:/xampp/apache/crt/dev.gfbio.uni-jena.de/server.crt"
+SSLCertificateKeyFile "C:/xampp/apache/crt/dev.gfbio.uni-jena.de/server.key"
+ServerAdmin sven.thiel@uni-jena.de
+
+
+ProxyPass           /excluded !
+ProxyPreserveHost   On
+RequestHeader set X-Forwarded-Proto: "https"
+ProxyRequests       Off
+ProxyTimeout        600
+
+ProxyPass "/daisi/" "http://localhost:4200/"
+ProxyPassReverse "/daisi/" "http://localhost:4200/"
+
+ProxyPass "/daisi-api/" "http://localhost:3000/"
+ProxyPassReverse "/daisi-api/" "http://localhost:3000/"
+
+</VirtualHost>
+```
+
+In addition, the applications must run under https. Now that we have set up the individual hosts in Apache, the only missing piece is the creation and integration of a valid certificate. Please copy both files from "search2.0/setup/certificate" into "{path/to/xampp}/apache/crt/" and execute "make-cert.bat" afterwards.
+
+### hosts @ Windows
+
+Please add the following information at the end of your "hosts" file. Within Windows, you will find that file "C:\Windows\System32\drivers".
+
+> 127.0.0.1 dev.gfbio.uni-jena.de
+
+This ensures, that your local machine is acting like the public domain "dev.gfbio.uni-jena.de" and Keycloak should accept your requests. Within "package,json", you will find a script "openid" for easy use. So you are able to start it directly from Visual Studio Code.
+
+## OpenID Connect (via Keycloak)
+
+First, the source code contains sensitive data (credentials) for the authentication provider at the GWDG. We need to clean that before publishing this. If you want to get this repository running, you need to modify one file within your operating system, as well as the script of Angular deployment.
+
+## Diagram
+
+![Diagram](search2.0/DatasetSearch/src/assets/img/diagram.png)
+
+After retrieving the results, it is mapped to the result class.
+<br />The orange rectangels are classes.
+<br />The blue ellipses are attributes.
  
-1. create a new module in the NodeServer for your search index (myIndex.js) and provide a search ``/search`` function
-2. add your module to the app.js file and add the new APIs to swagger
-3. test the connection, e.g., (http://localhost:3000/myIndex/search, http://localhost:3000/api-docs)
-4. add further function to your module if necessary, e.g., ``/suggest`` (for auto-complete function) and ``/semantic-search`` (if you want to expand the query keywords on related terms)
-5. create a new component with the angular cli, e.g., ``ng generate component myIndex``
-6. in ``app.components.ts`` and ``app-routing.module.ts``  add your component to the index and route arrays
-7. implement your component (add the required components to the html file, add the methods to the ts file)
-8. map your index fields to Dai:Si’s underlying data model (create a new service, e.g., ``myIndex-preprocess-data.service.ts`` file)
-9. in your new component, call the node service and pass the parameters of your custom index
-10. test your new application: http://localhost:4200/myIndex
-
-
-## Issue Tracking
-
-Please report bugs and issues in the GitHub issue tracker.
-
-## Changelog
-
-### 21.12.2021 v0.5
-
-* integration of keycloak authentication service (angular & nodejs)
-* rest api for basket(s) access
-* persistent storage of baskets (via mysql/mariadb)
-
-### 29.07.2021 v0.4_beta
-
-* Terminology widget added (info box in semantic search - explanation on expanded terms)
-* dataset basket improvements: spinner added (creation of zip file can take some seconds), 'empty basket' function
-
-### 07.07.2021 v0.3
-
-* minimap added (select a dataset and if coordinates are present the geographic location is shown on the map)
-* dataset basket with download function (select datasets, open the basket and download all files as zip)
-* related datasets/publications are displayed
-* improved citation dialog (related datasets/publications added)
-* bugfix semantic search: expanded terms are only displayed when they occur in the dataset
-* config variables for Node and Angular are now provided in separate environment files
-
-### 26.03.2021 v0.2
-
-* color and css revised
-* additional information on demand (mouseover) added
-* components revised for more modular structure
-* bugfix semantic search - expanded terms highlighted in title and description
-* collapse/expand for longer descriptions and parameters
-
-### 05.03.2021 v0.1
-
-* tba
-
-## License
-
-[Dai:Si] is distributed under the terms of the GNU LGPL v3.0. (https://www.gnu.org/licenses/lgpl-3.0.en.html) 
+<br />The result class contains 5 attributes and two classes (Hit, Aggrigation).
+<br />The Aggrigation class contains 3 attributes and one class (Facet). 
+<br />The Facet contains 3 attributes.
+<br />The Hit class contains 14 attributes and 4 classes(Upperlabel, Description, Citation, Linkage).
+<br />The UpperLabel contains 3 attributes.
+<br />The Description contains 2 attributes.
+<br />The Citation contains 6 attributes.
+<br />The linkage contains 3 attributes.

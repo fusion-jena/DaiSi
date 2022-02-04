@@ -10,31 +10,11 @@
 	</div>
     <mat-dialog-content class="mat-typography">
         <div *ngIf="result.getDataCenter() == 'PANGAEA'">
-            <!--<div>
-                <span class="font-weight-bold">title:</span> {{result.getTitle()}}
-            </div>
-            <div>
-                <span class="font-weight-bold">creator: </span>
-                <span *ngFor="let creator of result.getCreator()">{{creator}}, </span>
-            </div>
-            <div>
-                <span class="font-weight-bold">date:</span> {{result.getDate()}}
-            </div>-->
 			<span class="font-weight-bold" *ngFor="let creator of result.getCreator()">{{creator}}, </span> 
 			<span class="font-weight-bold">({{result.getPubYear()}}):</span> 
 			{{result.getTitle()}},    <a *ngIf="result.getDOI() !== 'undefined'" href="{{result.getDOI()}}" target="_blank">{{result.getDOI()}}</a>
         </div>
 		<div *ngIf="result.getDataCenter() == 'GATERSLEBEN'">
-            <!--<div>
-                <span class="font-weight-bold">title:</span> {{result.getTitle()}}
-            </div>
-            <div>
-                <span class="font-weight-bold">creator: </span>
-                <span *ngFor="let creator of result.getCreator()">{{creator}}, </span>
-            </div>
-            <div>
-                <span class="font-weight-bold">date:</span> {{result.getDate()}}
-            </div>-->
 			<span class="font-weight-bold" *ngFor="let creator of result.getCreator()">{{creator}}, </span> 
 			<span class="font-weight-bold">({{result.getPubYear()}}):</span> 
 			{{result.getTitle()}},    <a *ngIf="result.getDOI() !== 'undefined'" href="{{result.getDOI()}}" target="_blank">{{result.getDOI()}}</a>

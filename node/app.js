@@ -21,7 +21,7 @@ app.get('/', function(req, res){
 });
 
 //start application on port 3000
-const APP_PORT = process.env.APP_PORT || 3000;
+const PORT = process.env.APP_PORT || 3000;
 const HOST = process.env.HOST;
 
 //swagger definition
@@ -31,22 +31,14 @@ const swaggerDefinition = {
     version: '1.0.0',
     description: 'Endpoints for dataset search',
   },
-  host: process.env.HOST,
-  basePath: '/',
-  securityDefinitions: {
-    bearerAuth: {
-      type: 'apiKey',
-      name: 'Authorization',
-      scheme: 'bearer',
-      in: 'header',
-    },
-  },
+  host: `${HOST}:${PORT}`,
+  basePath: '/'
 };
 
 //keep each index in a separate module
 const options = {
   swaggerDefinition,
-  apis: ['gfbio.js']
+  apis: ['gfbio.js', './routes/basket.route.js']
 };
 
 //initialize swagger
@@ -104,6 +96,6 @@ require("./routes/basket.route")(app);
 var elastic_gfbio = require('./gfbio');
 
 // eslint-disable-next-line no-console
-app.listen(APP_PORT, () => console.log(`Listening at ${HOST} on port ${APP_PORT}`));
+app.listen(PORT, () => console.log(`Listening at ${HOST} on port ${PORT}`));
 
 app.use('/gfbio', elastic_gfbio);

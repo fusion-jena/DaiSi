@@ -12,7 +12,7 @@
         <div class="pl-0 pb-3 d-flex">
             <div class="colorBox" [style.background-color]="item.getColor()"></div>
             <div>
-                <div [matTooltip]="item.coordinates()" matTooltipClass="result-item-tooltip">
+                <div [matTooltip]="item.getTitleTooltip()" matTooltipClass="result-item-tooltip">
                     <div *ngIf="item.getTitleUrl() === 'undefined'" [innerHTML]="item.getTitle()"></div>
                     <a *ngIf="item.getTitleUrl() !== 'undefined'" href="{{item.getTitleUrl()}}" target="_blank">
                         <div [innerHTML]="item.getTitle()"></div>
@@ -43,9 +43,9 @@
                         </div>
                     </div>
                     <img *ngIf="item.getVat()" src="{{vatImg}}" class="vat-img pr-2"
-                         [matTooltip]="item.transferToVat()" matTooltipClass="result-item-tooltip">&nbsp;
+                         [matTooltip]="item.getVatTooltip()" matTooltipClass="result-item-tooltip">&nbsp;
                     <!--Blue elements in result item-->
-                    <span (click)="openDialog(itemId)" class="pr-2 result-item-blue" matTooltip="Show citation"
+                    <span *ngIf="item.getCitation().getSource() !== undefined && item.getCitation().getCreator() !== []" (click)="openDialog(itemId)" class="pr-2 result-item-blue" matTooltip="Show citation"
                           matTooltipClass="result-item-tooltip"><span><fa-icon class="fa-sm"
                                                                                [icon]="faQuoteLeft"></fa-icon></span> Citation </span>
                     <span *ngFor="let obj of item.getMultimediaObjs()" class="pr-2 vertical-middle">

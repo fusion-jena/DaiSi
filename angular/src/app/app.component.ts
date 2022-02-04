@@ -37,11 +37,16 @@ export class AppComponent implements OnInit {
     }
 
     private initializeUserOptions(): void {
-        this.user = this.keycloakService.getUsername();
-        this.keycloakService.loadUserProfile().then(profile => {
-            console.log(profile.username);
-            console.log(profile['attributes']); //gives you array of all attributes of user, extract what you need
-        });
+        try{
+            this.user = this.keycloakService.getUsername();
+            this.keycloakService.loadUserProfile().then(profile => {
+                console.log(profile.username);
+                console.log(profile['attributes']); //gives you array of all attributes of user, extract what you need
+            });
+        }catch{
+            this.user = null;
+        }
+        
     }
 
     public async ngOnInit() {

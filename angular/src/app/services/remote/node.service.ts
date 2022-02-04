@@ -30,6 +30,8 @@ export class NodeService {
             let results: Result;
             results = serviceType.getResult(data, otherParameters);
             this.communicationService.setResult(results);
+            console.log(results);
+            console.log(data);
             this.spinner.hide();
         }, err => {
             alert(environment.textAlertSemSearchError);
@@ -41,28 +43,23 @@ export class NodeService {
         const body = {
             term: key
         };
-        const headers = this.headers;
-        return this.http.post<any>(this.url + this.suggestURL, body, {headers});
+        return this.http.post<any>(this.url + this.suggestURL, body);
     }
 
     addToBasket(itemInDatabase): any {
-        const headers = this.headers;
-        return this.http.post<any>(this.url + this.addToBasketUrl, itemInDatabase, {headers});
+        return this.http.post<any>(this.url + this.addToBasketUrl, itemInDatabase);
     }
 
     readFromBasket(userId): any {
-        const headers = this.headers;
-        return this.http.get<any>(this.url + this.readFromBasketUrl + userId, {headers});
+        return this.http.get<any>(this.url + this.readFromBasketUrl + userId);
     }
 
     deleteFromBasket(itemInDatabase): any {
-        const headers = this.headers;
-        return this.http.post<any>(this.url + this.deleteFromBasketUrl, itemInDatabase, {headers});
+        return this.http.post<any>(this.url + this.deleteFromBasketUrl, itemInDatabase);
     }
 
     deleteAllBasket(userId): any {
-        const headers = this.headers;
-        return this.http.post<any>(this.url + this.deleteAllBasketUrl, {userId}, {headers});
+        return this.http.post<any>(this.url + this.deleteAllBasketUrl, {userId});
     }
 
     basketDownload(baskets): any {

@@ -8,6 +8,7 @@ import {Facet} from '../../models/result/facet';
 import {Description} from '../../models/result/description';
 import {Linkage} from '../../models/result/linkage';
 import {UpperLabel} from '../../models/result/upperLabel';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
     providedIn: 'root'
@@ -19,28 +20,16 @@ export class GfbioPreprocessDataService {
     constructor(private communicationService: CommunicationService) {
     }
 
-    public static dataCenter = 'Data Center';
-    public static dataType = 'Data Type';
-    public static parameter = 'Parameter';
-    public static taxonomy = 'Taxonomy';
-    public static geographicRegion = 'Geographic Region';
-    public static type = 'Type';
-    public static datacenterTooltips = {
-        SNSB: 'This dataset is provided by Staatliche Naturwissenschaftliche ' +
-            'Sammlungen Bayerns; SNSB IT Center, M;nchen (SNSB).',
-        SGN: 'This dataset is provided by Senckenberg Gesellschaft f;r Naturforschung; Leibniz Institute Frankfurt (SGN).',
-        BGBM: 'This dataset is provided by Botanic Garden and Botanical Museum Berlin, Freie Universit;t Berlin (BGBM).',
-        MfN: 'This dataset is provided by Leibniz Institute for Research on Evolution and Biodiversity, Berlin (MfN).',
-        ZFMK: 'This dataset is provided by Zoological Research Museum Alexander Koenig; Leibniz ' +
-            'Institute for Animal Biodiversity, Bonn (ZFMK).',
-        SMNS: 'This dataset is provided by State Museum of Natural History Stuttgart (SMNS).',
-        PANGAEA: 'This dataset is provided by Data Publisher for Earth; Environmental Science  (PANGAEA).',
-        DSMZ: 'This dataset is provided by Leibniz Institute DSMZ; German Collection of Microorganisms ' +
-            'and Cell Cultures, Braunschweig (DSMZ).',
-        Gatersleben: 'e!DAL;PGP ; Plant Genomics and Phenomics Research Data Repository, ' +
-            'Leibniz Institute of Plant Genetics and Crop Plant Research (IPK) Gatersleben'
-    };
+    public static dataCenter = environment.dataCenter;
+    public static dataType = environment.dataType;
+    public static parameter = environment.parameter;
+    public static taxonomy = environment.taxonomy;
+    public static geographicRegion = environment.geographicRegion;
+    public static type = environment.type;
+    public static datacenterTooltips = environment.datacenterTooltips;
     private id;
+    private colors = environment.colors;
+    private vatTooltip = environment.vatTooltip;
 
     /*maps the json which comes from the server to the Result class, it is the most important function in this service,
     other functions can be deleted according to the json response
@@ -132,6 +121,14 @@ export class GfbioPreprocessDataService {
         }
     }
 
+    getTitleTooltip(hit: Hit): string {
+        if (hit.getLatitude !== undefined && hit.getLongitude() !== undefined) {
+            return 'This dataset has coordinates: min latitude: ' + hit.getLatitude() + ', max longitude: ' + hit.getLongitude();
+        } else {
+            return 'This dataset has no coordinates and can not be located on the map.';
+        }
+    }
+
 // maps the licenses
     getLicense(dataset): [] {
         let license = dataset?._source?.licenseShort;
@@ -161,10 +158,13 @@ export class GfbioPreprocessDataService {
         hit.setCitation(this.getCitation(source, this.getTopicUrl(dom)));
         hit.setLicence(this.getLicense(item));
         hit.setVat(source?.vatVisualizable);
+        hit.setVatTooltip(this.vatTooltip);
         hit.setXml(source?.xml);
         hit.setLongitude(source?.maxLongitude);
         hit.setLatitude(source?.minLatitude);
+        hit.setTitleTooltip(this.getTitleTooltip(hit));
         hit.setMetadatalink(source?.metadatalink);
+        // set array of descriptions
         const tr = dom?.querySelectorAll('.desc tr');
         const description = [];
         tr.forEach(row => {
@@ -177,6 +177,7 @@ export class GfbioPreprocessDataService {
                 description.push(descriptionItem);
             }
         });
+        // if the search is semantic, puts the highlighted words in <em></em> tag
         if (semantic) {
             const highLightDescription = item?.highlight?.description;
             if (highLightDescription !== undefined && highLightDescription.length > 0) {
@@ -191,6 +192,8 @@ export class GfbioPreprocessDataService {
                 });
             }
         }
+        // in order to extract some properties from xml, I converted it from string to xml format
+        // the properties that are going to be extracted are: identifier, linkage and MultimediaObjs
         const xml = this.communicationService.xmltoJson(source?.xml)?.elements?.[0]?.elements;
         const multimediaObjs: Array<any> = [];
         const linkage = new Linkage();
@@ -201,7 +204,6 @@ export class GfbioPreprocessDataService {
             }
             if (element.name === 'linkage') {
                 if (element.attributes.type === 'multimedia') {
-                    // linkage.setMultimedia(element.elements[0].text);
                     const text = element.elements[0].text;
                     const differentTypes = [['.mp3', 'sound'], ['.mp4', 'video'],
                         ['.jpg', 'picture'], ['.tiff', 'picture'],
@@ -226,6 +228,7 @@ export class GfbioPreprocessDataService {
                 }
 
             }
+            // some information related to description (relation) should be extracted from xml
             if (element.name === 'dc:relation') {
                 let value = element.elements[0].text;
                 if (value.startsWith('http')) {
@@ -243,16 +246,17 @@ export class GfbioPreprocessDataService {
         hit.setLinkage(linkage);
         hit.setDescription(description);
         hit.setMultimediaObjs(multimediaObjs);
-        const colors = ['#94e851', '#f52f57', '#173b4e', '#ee82ee', '#ffff00', '#27408b', '#009acd', '#ff00ff', '#8b0000', '#00fa9a'];
-        hit.setColor(colors[this.id - 1]);
-        this.id = this.id - 1;
+        if (hit.getLatitude() !== undefined) {
+            this.id--;
+            hit.setColor(this.colors[this.id]);
+        }
         return hit;
     }
 
 // maps labels
     getLabels(item): UpperLabel[] {
         const upperLabels: UpperLabel[] = [];
-
+// if the citation date exist, a blue label will be created
         if (item?.citation_date) {
             const year = new UpperLabel();
             year.setInnerInfo(item?.citation_date?.substring(0, 4));
@@ -260,7 +264,7 @@ export class GfbioPreprocessDataService {
             year.setColorClass('bg-label-blue');
             upperLabels.push(year);
         }
-
+// if the dataset is open access, a green label will be created
         if (!item?.accessRestricted) {
             const access = new UpperLabel();
             access.setInnerInfo('Open Access');
@@ -268,11 +272,17 @@ export class GfbioPreprocessDataService {
             access.setColorClass('bg-label-green');
             upperLabels.push(access);
         }
-
+// the label related to the datacenter with the golden red color will be created
+// it contains the name of the datacenter
         const dataCenter = new UpperLabel();
+        /*as the name of the datacenter which is provided in the json result is a long string and no short version
+        was provided, the short version was extracted by some if statements*/
         dataCenter.setInnerInfo(item?.dataCenter.split(' ').pop());
         if (dataCenter.getInnerInfo() === 'Science') {
             dataCenter.setInnerInfo('PANGAEA');
+        }
+        if (dataCenter.getInnerInfo() === 'Archive') {
+            dataCenter.setInnerInfo('ENA');
         }
         switch (dataCenter.getInnerInfo()) {
             case 'SNSB':

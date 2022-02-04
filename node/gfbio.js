@@ -336,7 +336,7 @@ router.post('/addToBasket', (req, res) => {
     // pool.query(sql,[req.body.userId,req.body.basketContent], function (err, result, fields) {
     //     if (err) throw new Error(err)
     // })
-    res.status(200).send(req.body);
+    res.status(201).send(res);
 })
 // router.post('/addToBasket', (req, res) => {
 //     var sql = "INSERT INTO basket (user_id,data_id,data) VALUES(?,?,?)";
@@ -397,7 +397,7 @@ router.post('/addToBasket', (req, res) => {
  */
 router.get('/readFromBasket', (req, res) => {
     basket.findByUserId(req, res);
-    res.status(200).send(req.body);
+    res.status(200).send(res);
 
     // var sql = "SELECT * FROM gfbio_basket WHERE userid = (?) ORDER BY basketid DESC LIMIT 1";
     // pool.query(sql,[req.body.userId], function (err, result, fields) {

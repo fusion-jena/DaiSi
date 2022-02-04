@@ -4,7 +4,7 @@ import {CommunicationService} from '../services/local/communication.service';
 import {faSearch} from '@fortawesome/free-solid-svg-icons';
 import {StartSearchingService} from '../services/local/start-searching.service';
 import {environment} from '../../environments/environment';
-
+import * as booleanParser from 'boolean-parser';
 @Component({
     selector: 'app-search-input',
     templateUrl: './search-input.component.html',
@@ -48,6 +48,12 @@ export class SearchInputComponent {
         this.alertSearch = this.formatSimpleSearch.test(this.searchKey);
         this.alertSemanticSearch = false;
         this.startSearching(this.semanticValue);
+        try {
+            const parsedQuery = booleanParser.parseBooleanQuery(this.searchKey);
+            console.log(parsedQuery);
+        } catch (e){
+            console.log(e);
+        }
     }
 
 // by clicking on the semantic search button, this method will be called
