@@ -43,7 +43,9 @@ MySQL_Host="localhost"
 MySQL_Port=3306
 MySQL_User="<User>"
 MySQL_Password="<Password>"
-MySQL_Database="gfbio" ```
+MySQL_Database="gfbio" 
+
+```
 
 
 ## Installation and Start
