@@ -15,7 +15,9 @@ var basket = require('./controllers/basket.controller')
 var GFBioTS_URL = process.env.GFBIOTS_URL;
 var Pangaea_URL = process.env.PANGAEA_URL;
 var Pangaea_Suggest_URL = process.env.PANGAEA_SUGGEST_URL;
-// Sets up the routes.  
+var TERMINOLOGY_SUGGEST_URL = process.env.TERMINOLOGY_SUGGEST_URL;
+const { cartesianProduct } = require('cartesian-product-multiple-arrays');
+// Sets up the routes.
 /********************** GFBIO code *******************/
 /**
  * POST /gfbio/search
@@ -78,7 +80,7 @@ router.post('/search', (req, res) => {
 
     //get the keyword from the body
     const keyword = req.body.queryterm;
-
+    console.log('keywords: ' + keyword)
     let filter = [];
     let from = 0;
     let size = 0;
@@ -105,7 +107,6 @@ router.post('/search', (req, res) => {
 
     //construct the complete query with from and size
     const data = getCompleteQuery(boostedQuery, from, size);
-    console.log(JSON.stringify(data));
     //config the header, we only accept json data
     const config = {
         headers: {
@@ -114,6 +115,7 @@ router.post('/search', (req, res) => {
     }
     //post it to GFBio elasticsearch index
     return axios.post(Pangaea_URL, data, config).then(resp => {
+        console.log("data is: " + JSON.stringify(data));
 
         // if you receive data - send it back
         res.status(200).send(resp.data);
@@ -131,14 +133,14 @@ router.post('/search', (req, res) => {
 });
 
 /**
- * POST /suggest
- * Suggest service
+ * POST /suggest-Pangaea
+ * Pangaea Suggest service for simple search
  */
 /**
  * @swagger
- * /gfbio/suggest:
+ * /gfbio/suggest-pan:
  *   post:
- *     description: Returns query term suggestions for given characters
+ *     description: Returns query term suggestions for given characters from Pangaea service
  *     tags: [Search GFBio - Elastic index]
  *     summary: returns query term suggestions
  *     consumes:
@@ -159,7 +161,7 @@ router.post('/search', (req, res) => {
  *       201:
  *         description: object with key 'suggest' containing an array with options
  */
-router.post('/suggest', (req, res) => {
+router.post('/suggest-pan', (req, res) => {
     console.log('/suggest:' + req.body.term);
     //get the term from the body
     const term = req.body.term
@@ -186,6 +188,56 @@ router.post('/suggest', (req, res) => {
         .then((resp) => {
             //console.log(`Status: ${resp.status}`);
             //console.log('Body: ', resp.data);
+            res.status(200).send(resp.data);
+
+        })
+        .catch((err) => {
+            console.log(err);
+
+            return res.status(500).json({
+                msg: 'Error', err
+            });
+        });
+
+})
+
+/**
+ * POST /suggest-Terminology
+ * Terminology Suggest service for semantic search
+ */
+/**
+ * @swagger
+ * /gfbio/suggest-ter:
+ *   post:
+ *     description: Returns query term suggestions for given characters from Terminology service
+ *     tags: [Search GFBio - Elastic index]
+ *     summary: returns query term suggestions
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: term
+ *         description: the characters for which suggestions are needed
+ *         schema:
+ *            type: object
+ *            required:
+ *              - term
+ *            properties:
+ *              term:
+ *                type: string
+ *                example: quer
+ *     responses:
+ *       201:
+ *         description: object with key 'suggest' containing an array with labels
+ */
+router.post('/suggest-ter', (req, res) => {
+    console.log('/suggest:' + req.body.term);
+    //get the term from the body
+    const term = req.body.term
+
+    //post the request to elasticsearch
+    return axios.get(TERMINOLOGY_SUGGEST_URL + "?query=" + term + "*&match_type=exact")
+        .then((resp) => {
             res.status(200).send(resp.data);
 
         })
@@ -239,7 +291,7 @@ router.post('/basketDownload', (req, res) => {
     selectedBasket.forEach(function (result, index) {
 
         // metadata
-        var identifier = result['identifier'].replace(/[` ~!@#$%^&*()_|+\-=÷¿?;:'",.<>\{\}\[\]\\\/]/gi, '');
+        var identifier = result['dcIdentifier'].replace(/[` ~!@#$%^&*()_|+\-=÷¿?;:'",.<>\{\}\[\]\\\/]/gi, '');
         zip.file(identifier + "_metadata.xml", result['xml']);
 
         // data
@@ -447,8 +499,6 @@ router.get('/readFromBasket', (req, res) => {
  *         description: hits.hits contains an array with dataset objects matching the query.
  */
 router.post('/semantic-search', (req, res) => {
-
-    console.log('/semantic-search' + req.body);
     /*e.g.,
   * {
     *	"queryterm":["grassland","honeybee"],
@@ -456,57 +506,79 @@ router.post('/semantic-search', (req, res) => {
     * 	"size":10
   * }
   */
-
     //expects keyword as string array
     const keywords = req.body.queryterm; //array with keywords
+    const keywordsCombination = []
+    keywords.forEach(function (item) {
+        const insideArr = item.split('+');
+        keywordsCombination.push(insideArr)
+    })
+    const flatKeyWords = keywordsCombination.flat()
+    const response = []
 
-    console.log(keywords);
-
-    let allKeyWords = keywords;
     let axiosArray = [];
 
     let termData = [];
 
     //at first, send each keyword to GFBio TS
-    for (i = 0; i < keywords.length; i++) {
+    for (i = 0; i < flatKeyWords.length; i++) {
         //console.log("keyword: "+keywords[i]);
-        axiosArray.push(axios.get(GFBioTS_URL + "search?query=" + keywords[i] + "&match_type=exact"));
-        console.log(axiosArray[i]);
+        axiosArray.push(axios.get(GFBioTS_URL + "search?query=" + flatKeyWords[i] + "&match_type=exact"));
     }
     //collect all calls first and then send it in a bunch
     //axios will handle them in parallel and will only continue when all calls are back
     return axios.all(axiosArray)
         .then(axios.spread((...responses) => {
             for (i = 0; i < axiosArray.length; i++) {
+                let allKeyWords = [flatKeyWords[i]];
                 var results = responses[i].data.results;
-
                 results.forEach(function (item) {
                     var log = "";
                     //console.log(item);
                     for (const [key, value] of Object.entries(item)) {
-						if (item.sourceTerminology !== 'GEONAMES' && item.sourceTerminology !== 'RIVERS_DE'){
-							if (key === 'commonNames') {
-							  var keyword = value.toString().replace(/,/g,"\"|\"");
-                              allKeyWords = allKeyWords.concat("\""+keyword+"\"")
-                              log += "----- commonName : " + value+"\n";
+                        if (item.sourceTerminology !== 'GEONAMES' && item.sourceTerminology !== 'RIVERS_DE') {
+                            if (key === 'commonNames') {
+                                // var keyword = value.toString().replace(/,/g, "\"|\"");
+                                // allKeyWords = allKeyWords.concat("\"" + keyword + "\"")
+                                // log += "----- commonName : " + value + "\n";
+                                var keyword = value.toString();
+                                keyword = keyword.split(",");
+                                for (var t = 0; t < keyword.length; t++) {
+                                    keyword[t] = '\'' + keyword[t] + '\''
+                                    if (!keyword[t].startsWith('(') && !keyword[t].startsWith('\'')) {
+                                        keyword[t] = '\'' + keyword[t] + '\'';
+                                    }
+                                }
+                                allKeyWords = allKeyWords.concat(keyword)
                             }
                             if (key === 'synonyms') {
-                                var keyword = value.toString().replace(/,/g, "\"|\"");
-                                allKeyWords = allKeyWords.concat("\"" + keyword + "\"")
-                                log += "----- synonym : " + value + "\n";
-                            }
-                            if (key === 'label') {
+                                // var keyword = value.toString().replace(/,/g, "\"|\"");
+                                // allKeyWords = allKeyWords.concat("\"" + keyword + "\"")
+                                // log += "----- synonym : " + value + "\n";
 
-                                allKeyWords = allKeyWords.concat("\"" + value + "\"")
-                                log += "----- label : " + value + "\n";
+                                var keyword = value.toString();
+                                keyword = keyword.split(",");
+                                for (var t = 0; t < keyword.length; t++) {
+                                    keyword[t] = '\'' + keyword[t] + '\''
+                                    if (!keyword[t].startsWith('(') && !keyword[t].startsWith('\'')) {
+                                        keyword[t] = '\'' + keyword[t] + '\'';
+                                    }
+                                }
+                                allKeyWords = allKeyWords.concat(keyword)
+
+
                             }
-						 
+                            // if (key === 'label') {
+                            //
+                            //     allKeyWords = allKeyWords.concat("\"" + value + "\"")
+                            //     log += "----- label : " + value + "\n";
+                            // }
+
                         }
                     }
-					if (item.sourceTerminology !== 'GEONAMES' && item.sourceTerminology !== 'RIVERS_DE'){
-						termData.push(item);
-					}
-                    
+                    if (item.sourceTerminology !== 'GEONAMES' && item.sourceTerminology !== 'RIVERS_DE') {
+                        termData.push(item);
+                    }
 
 
                     if (log.length > 0) {
@@ -515,13 +587,31 @@ router.post('/semantic-search', (req, res) => {
                         console.log(log);
                     }
                 });
+                response.push(allKeyWords)
+
             }
             console.log(" ************************** ");
-
-            allKeyWords = allKeyWords.filter((a, b) => allKeyWords.indexOf(a) === b)
-
-            var semanticTerms = allKeyWords.join("|");
-            console.log(semanticTerms);
+            let z = 0
+            for (var i = 0; i < keywordsCombination.length; i++) {
+                for (var j = 0; j < keywordsCombination[i].length; j++) {
+                    
+					keywordsCombination[i][j] = response[z++];
+                }
+            }
+            let cartesianProductAll = []
+            for (var t = 0; t < keywordsCombination.length; t++) {
+                cartesianProductAll.push(cartesianProduct(...keywordsCombination[t]))
+            }
+            cartesianProductAll = cartesianProductAll.flat()
+            const lastArr = []
+            for (var t = 0; t < cartesianProductAll.length; t++) {
+                lastArr.push(cartesianProductAll[t].join(' + '))
+            }
+            console.log(lastArr)
+            // allKeyWords = allKeyWords.filter((a, b) => allKeyWords.indexOf(a) === b)
+            // console.log('allKeyWords: '+ allKeyWords)
+            // var semanticTerms = allKeyWords;
+            // var semanticTerms = allKeyWords.join("|");
             //elastic call
             let filter = [];
             let from = 0;
@@ -541,7 +631,7 @@ router.post('/semantic-search', (req, res) => {
             }
 
             //get the filtered query
-            const filteredQuery = getBooleanQuery(allKeyWords, filter);
+            const filteredQuery = getQuery(lastArr, filter);
 
             //apply the boost
             const boostedQuery = applyBoost(filteredQuery);
@@ -555,26 +645,26 @@ router.post('/semantic-search', (req, res) => {
                     'Content-Type': 'application/json'
                 }
             }
-            //console.log(JSON.stringify(data));
+            // console.log("data is: " + JSON.stringify(data));
 
             //post the expanded query to GFBio elastic index
+            console.log("data is: " + JSON.stringify(data));
             return axios.post(Pangaea_URL, data, config);
 
         }))
         .then(resp => {
             //last item is necessary for highlighting the expanded terms
-
             resp.data.termData = termData;
-
+            // console.log("termData is: " + JSON.stringify(termData));
             //resp.data.lastItem = allKeyWords;
             var extendedTerms = [];
             var result = resp.data.hits.hits;
             for (var i = 0, iLen = result.length; i < iLen; i++) {
                 var highlight = result[i].highlight;
-                //console.log(highlight);
+                // console.log(highlight)
                 if (highlight != null) {
                     var highlightArr = extractHighlightedSearch(highlight);
-                    //console.log(highlightArr);
+                    // console.log(highlightArr);
                     var isAdded = false;
                     for (var iHighlight = 0; iHighlight < highlightArr.length; iHighlight++) {
                         for (var iExtended = 0; iExtended < extendedTerms.length; iExtended++) {
@@ -677,7 +767,7 @@ function getFilteredQuery(keyword, filterArray) {
             "simple_query_string": {
                 "query": keyword,
                 "fields": ["fulltext", "fulltext.folded^.7", "citation^3", "citation.folded^2.1"],
-                "default_operator": "and"
+                "default_operator": "or"
             }
         };
     } else {
@@ -694,9 +784,8 @@ function getFilteredQuery(keyword, filterArray) {
         }
     };
 }
-
 function getBooleanQuery(keyword, filterArray) {
-
+    // console.log(keyword)
     var queryObj = {};
     var boostedKeywords = [];
 
@@ -721,7 +810,7 @@ function getBooleanQuery(keyword, filterArray) {
                 "simple_query_string": {
                     "query": keywordWithQuotes,
                     "fields": fields,
-                    "default_operator": "and",
+                    "default_operator": "or",
                     "boost": booster
                 }
             });
@@ -750,6 +839,75 @@ function getBooleanQuery(keyword, filterArray) {
 
 
     return queryObj;
+}
+function getQuery(keyword, filterArray) {
+    //console.log(keyword)
+    var queryObj = {};
+    var boostedKeywords = [];
+    console.log(keyword)
+
+    //keyword array with original term [0] and expanded terms [1] - [X]
+    if (keyword.length > 0) {
+        var firstKeyWord = keyword[0];
+        keyword.shift();
+        var keysWithParanthesis = []
+        for (let i = 0; i < keyword.length; i++) {
+            keysWithParanthesis.push('(' + keyword[i] + ')');
+        }
+        var secondKeyWord = keysWithParanthesis.join(' ');
+        var firstBooster = getBooster(1, firstKeyWord)
+        var secondBooster = getBooster(2, secondKeyWord)
+        boostedKeywords.push(firstBooster);
+        boostedKeywords.push(secondBooster);
+
+        queryObj = {
+            "bool": {
+                "should": boostedKeywords
+            }
+        };
+    } else {
+        return {"match_all": {}};
+    }
+
+
+    queryObj = {
+        "bool": {
+            "must": [{
+                "bool": {
+                    "should": boostedKeywords
+                }
+            }],
+            "filter": filterArray
+        }
+    }
+
+
+    return queryObj;
+}
+function getBooster(level, keys) {
+        var booster = level; //less priority to expanded terms
+        var fields = [];
+        if (level === 1) { // higher priority to original keyword
+            booster = 2.2;
+            fields = ["citation_title^3", "citation_title.folded^2.1",
+                "description^2.1", "description.folded",
+                "type.folded", "parameter.folded", "region.folded", "dataCenter.folded"];
+            //["fulltext", "fulltext.folded^.7", "citation^3", "citation.folded^2.1"];
+        } else { // extended keywords
+            booster = 1;
+            fields = ["citation_title^3", "citation_title.folded^2.1",
+                "description^2.1", "description.folded",
+                "parameter.folded", "region.folded", "dataCenter.folded"];
+        }
+        var obj = {
+            "simple_query_string": {
+                "query": keys,
+                "fields": fields,
+                "default_operator": "or",
+                "boost": booster
+            }
+        }
+        return obj;
 }
 
 

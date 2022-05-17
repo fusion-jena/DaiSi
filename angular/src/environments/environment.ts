@@ -15,6 +15,8 @@ export const environment = {
   searchUrl: '/search',
   semSearchUrl: '/semantic-search',
   suggestUrl: '/suggest',
+  suggestPanUrl: '/suggest-pan',
+  suggestTerUrl: '/suggest-ter',
   basketUrl: '/basketDownload',
   addToBasketUrl: '/addToBasket',
   deleteFromBasket: '/deleteFromBasket',
@@ -24,6 +26,7 @@ export const environment = {
   vatImg: 'vat.png',
   semSearchImg: 'icon_semsearch3.png',
   textAlertSemSearchError: 'A connection error occured. Please reduce the amount of search terms or try the search again.',
+  textAlertWordLength: 'please choose a word longer than 4 letters to use the * in semantic search',
   textAlertBasketErrorDownload: 'An error occured during the download.\nPlease contact the administrator for more information.',
   textTooltipBasketVATvisualizable: 'dataset can be visualized in VAT',
   textTooltipBasketVATnotVisualizable: 'dataset can not be visualized in VAT',
@@ -34,6 +37,7 @@ export const environment = {
   textTooltipBasketMultimediaAvailable: 'multimedia are available for download',
   textTooltipBasketMultimediaNotAvailable: 'multimedia are not available for download',
   textTooltipBasketRemove: 'remove dataset from basket',
+  textTooltipBasketRemoveSure: 'Are you sure that you want to empty the basket?',
   textTooltipBasketEmpty: 'Please select a dataset from the search result.',
   textTSWidgetInfo: 'Your search query is expanded with relational terms obtained from GFBio\'s ' +
       'Terminology Service. Some terms can be further expanded with more narrower or broader terms. ' +
@@ -46,6 +50,7 @@ export const environment = {
   geographicRegion: 'Geographic Region',
   type: 'Type',
   colors: ['#94e851', '#f52f57', '#173b4e', '#ee82ee', '#ffff00', '#27408b', '#009acd', '#ff00ff', '#8b0000', '#00fa9a'],
+  noCoordinates: 'This dataset has no coordinates and can not be located on the map.',
   vatTooltip: 'This dataset can be transfered to VAT.',
   datacenterTooltips : {
       SNSB: 'This dataset is provided by Staatliche Naturwissenschaftliche ' +
@@ -60,7 +65,8 @@ export const environment = {
       DSMZ: 'This dataset is provided by Leibniz Institute DSMZ; German Collection of Microorganisms ' +
           'and Cell Cultures, Braunschweig (DSMZ).',
       Gatersleben: 'e!DAL;PGP ; Plant Genomics and Phenomics Research Data Repository, ' +
-          'Leibniz Institute of Plant Genetics and Crop Plant Research (IPK) Gatersleben'
+          'Leibniz Institute of Plant Genetics and Crop Plant Research (IPK) Gatersleben',
+	  ENA: 'European Nucleotide Archive'
   }
 };
 

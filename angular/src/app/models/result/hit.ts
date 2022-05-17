@@ -30,13 +30,20 @@ export class Hit {
     // it contains the information related to the download of the dataset
     private metadatalink: string;
     // it contains the information related to the download of the dataset
-    private identifier: string;
+    private dcIdentifier: string;
     // every dataset can be shown on the map with an specific color
     private color: string;
     // most of the information of the dataset is in the xml
     private xml: string;
     // if this dataset has been selected by the user
     private checkbox: boolean;
+
+    //
+    private datalink: string;
+
+    private parentIdentifier: string;
+
+    private dcType: Array<string>;
 
     getTitle(): string {
         return this.title;
@@ -67,15 +74,22 @@ export class Hit {
     }
 
     setMetadatalink(metadatalink: string): void {
-        this.metadatalink = metadatalink;
+        if(metadatalink != "undefined" && metadatalink != null)
+        {
+            this.metadatalink = encodeURI(metadatalink);
+        }else{
+            this.metadatalink = null;
+        }
+        
+        // this.metadatalink = metadatalink;
     }
 
     getIdentifier(): string {
-        return this.identifier;
+        return this.dcIdentifier;
     }
 
-    setIdentifier(identifier: string): void {
-        this.identifier = identifier;
+    setIdentifier(dcIdentifier: string): void {
+        this.dcIdentifier = dcIdentifier;
     }
 
     getLinkage(): Linkage {
@@ -99,7 +113,14 @@ export class Hit {
     }
 
     setTitleUrl(titleUrl: string): void {
-        this.titleUrl = titleUrl;
+        if(titleUrl != "undefined" && titleUrl != null)
+        {
+            this.titleUrl = encodeURI(titleUrl);
+        }else{
+            this.titleUrl = null;
+        }
+
+        // this.titleUrl = titleUrl;
     }
 
     getDescription(): Array<Description> {
@@ -188,5 +209,36 @@ export class Hit {
 
     setCheckbox(checkbox: boolean): void {
         this.checkbox = checkbox;
+    }
+
+    getDatalink(): string {
+        return this.datalink;
+    }
+
+    setDatalink(datalink: string): void {
+        if(datalink != "undefined" && datalink != null)
+        {
+            this.datalink = encodeURI(datalink);
+        }else{
+            this.datalink = null;
+        }
+
+        // this.datalink = datalink;
+    }
+
+    getParentIdentifier(): string {
+        return this.parentIdentifier;
+    }
+
+    setParentIdentifier(parentIdentifier: string): void {
+        this.parentIdentifier = parentIdentifier;
+    }
+
+    getType(): Array<string> {
+        return this.dcType;
+    }
+
+    setType(dcType: Array<string>): void {
+        this.dcType = dcType;
     }
 }

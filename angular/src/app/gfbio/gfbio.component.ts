@@ -15,7 +15,7 @@ export class GfbioComponent implements OnInit, SearchResult, Filters, SearchInpu
     semantic = false;
     resetFilters = true;
     result: Result;
-    searchKey = '';
+    searchKey = [];
     from = 0;
     filters;
     markers;

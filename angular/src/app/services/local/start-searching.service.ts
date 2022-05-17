@@ -11,18 +11,19 @@ export class StartSearchingService {
 
   constructor(private nodeService: NodeService, private communicationService: CommunicationService,
               private gfbioPreprocessData: GfbioPreprocessDataService) { }
-  startSearching(searchKey = '', semantic, from, filters): void{
+  startSearching(searchKey , semantic, from, filters): void{
       let urlTerm: string;
       const urlIndex = environment.context;
       let body: any;
       let key;
       if (semantic === true) {
-          key = searchKey.split(' ');
+          key = searchKey;
           urlTerm = environment.semSearchUrl;
       } else {
-          key = searchKey;
+          key = searchKey.join(' ');
           urlTerm = environment.searchUrl;
       }
+      console.log(key);
       body = JSON.stringify({queryterm: key, from,
           size: 10, filter: filters});
       this.nodeService.search(

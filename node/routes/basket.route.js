@@ -55,7 +55,7 @@ module.exports = app => {
    *   get:
    *     description: Returns a specific basket based on the basketId.
    *     tags: [Dai:Se - Baskets]
-   *     summary:Returns a specific basketbased on the basketId.
+   *     summary: Returns a specific basket based on the basketId.
    *     parameters:
    *       - in: path
    *         name: basketId

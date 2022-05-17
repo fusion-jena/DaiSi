@@ -23,6 +23,7 @@ export class BasketDialogComponent implements OnInit {
     textTooltipBasketMultimediaAvailable = environment.textTooltipBasketMultimediaAvailable;
     textTooltipBasketMultimediaNotAvailable = environment.textTooltipBasketMultimediaNotAvailable;
     textTooltipBasketRemove = environment.textTooltipBasketRemove;
+	textTooltipBasketRemoveSure = environment.textTooltipBasketRemoveSure;
     textTooltipBasketEmpty = environment.textTooltipBasketEmpty;
     spinner = false;
     savedData: Array<Hit> = [];

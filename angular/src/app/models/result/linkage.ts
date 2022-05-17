@@ -17,7 +17,14 @@ export class Linkage {
     }
 
     setMetadata(metadata: string): void {
-        this.metadata = metadata;
+        if(metadata != "undefined" && metadata != null)
+        {
+            this.metadata = encodeURI(metadata);
+        }else{
+            this.metadata = null;
+        }
+
+        // this.metadata = metadata;
     }
     getMultimedia(): Array<any> {
         return this.multimedia;

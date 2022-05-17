@@ -18,7 +18,7 @@ export class OtherFiltersComponent implements OnInit {
         this.filterValues.forEach((value) => {
             this.filter.forEach((item) => {
                 if (value === item.label) {
-                    console.log(item.label);
+                    // console.log(item.label);
                     item.checked = true;
                 }
             });

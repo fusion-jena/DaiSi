@@ -32,6 +32,7 @@
     "bootstrap": "^4.5.2",
     "class-transformer": "^0.4.0",
     "es6-shim": "^0.35.6",
+    "fast-cartesian": "^6.1.0",
     "jw-angular-pagination": "^1.2.0",
     "keycloak-angular": "^8.2.0",
     "keycloak-js": "^11.0.3",
@@ -41,12 +42,13 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^6.6.7",
     "stream": "0.0.2",
+    "tokenizr": "^1.6.5",
     "tslib": "^2.0.0",
     "xml-js": "^1.6.11",
     "zone.js": "~0.11.4"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^13.1.1",
+    "@angular-devkit/build-angular": "^13.1.4",
     "@angular/cli": "~13.1.1",
     "@angular/compiler-cli": "~13.1.0",
     "@types/jasmine": "~3.6.0",

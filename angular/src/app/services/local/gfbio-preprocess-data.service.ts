@@ -30,6 +30,7 @@ export class GfbioPreprocessDataService {
     private id;
     private colors = environment.colors;
     private vatTooltip = environment.vatTooltip;
+	private noCoordinates = environment.noCoordinates;
 
     /*maps the json which comes from the server to the Result class, it is the most important function in this service,
     other functions can be deleted according to the json response
@@ -123,9 +124,9 @@ export class GfbioPreprocessDataService {
 
     getTitleTooltip(hit: Hit): string {
         if (hit.getLatitude !== undefined && hit.getLongitude() !== undefined) {
-            return 'This dataset has coordinates: min latitude: ' + hit.getLatitude() + ', max longitude: ' + hit.getLongitude();
+            return 'min latitude: ' + hit.getLatitude() + ', max longitude: ' + hit.getLongitude();
         } else {
-            return 'This dataset has no coordinates and can not be located on the map.';
+            return this.noCoordinates;
         }
     }
 
@@ -164,6 +165,7 @@ export class GfbioPreprocessDataService {
         hit.setLatitude(source?.minLatitude);
         hit.setTitleTooltip(this.getTitleTooltip(hit));
         hit.setMetadatalink(source?.metadatalink);
+        hit.setDatalink(source?.datalink);
         // set array of descriptions
         const tr = dom?.querySelectorAll('.desc tr');
         const description = [];
@@ -196,11 +198,18 @@ export class GfbioPreprocessDataService {
         // the properties that are going to be extracted are: identifier, linkage and MultimediaObjs
         const xml = this.communicationService.xmltoJson(source?.xml)?.elements?.[0]?.elements;
         const multimediaObjs: Array<any> = [];
+        const types: Array<string> = [];
         const linkage = new Linkage();
         let relation = '';
         xml.forEach(element => {
             if (element.name === 'dc:identifier') {
                 hit.setIdentifier(element.elements[0].text);
+            }
+            if (element.name === 'dc:type') {
+                types.push(element.elements[0].text);
+            }
+            if (element.name === 'parentIdentifier') {
+                hit.setParentIdentifier(element.elements[0].text);
             }
             if (element.name === 'linkage') {
                 if (element.attributes.type === 'multimedia') {
@@ -243,6 +252,7 @@ export class GfbioPreprocessDataService {
             descriptionItem.setValue('<ul>' + relation + '</ul>');
             description.push(descriptionItem);
         }
+        hit.setType(types);
         hit.setLinkage(linkage);
         hit.setDescription(description);
         hit.setMultimediaObjs(multimediaObjs);
@@ -311,6 +321,9 @@ export class GfbioPreprocessDataService {
                 break;
             case 'Gatersleben':
                 dataCenter.setTooltip(GfbioPreprocessDataService.datacenterTooltips.Gatersleben);
+                break;
+			case 'ENA':
+                dataCenter.setTooltip(GfbioPreprocessDataService.datacenterTooltips.ENA);
                 break;
             default:
                 dataCenter.setTooltip('Publisher');

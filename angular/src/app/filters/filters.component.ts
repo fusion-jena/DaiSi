@@ -62,8 +62,8 @@ export class FiltersComponent implements OnChanges {
 
     startSearching(): void {
         this.filters.emit(this.chosenFilter);
-        console.log(this.chosenFilter);
-        console.log(this.filterValues);
+        // console.log(this.chosenFilter);
+        // console.log(this.filterValues);
     }
 
     removeFilter(i): void {
@@ -86,7 +86,7 @@ export class FiltersComponent implements OnChanges {
     }
 
     applyDate(dates, datePicker): void {
-        console.log(dates);
+        // console.log(dates);
         const start = dates[0];
         const end = dates[1];
         if (start !== undefined || end !== undefined) {

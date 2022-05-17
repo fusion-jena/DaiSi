@@ -10,7 +10,8 @@ import {environment} from '../../../environments/environment';
 })
 export class NodeService {
     url = environment.apiUrl;
-    suggestURL = environment.context + environment.suggestUrl;
+    suggestPanUrl = environment.context + environment.suggestPanUrl;
+    suggestTerUrl = environment.context + environment.suggestTerUrl;
     basketURL = environment.context + environment.basketUrl;
     addToBasketUrl = environment.context + environment.addToBasketUrl;
     deleteFromBasketUrl = environment.context + environment.deleteFromBasket;
@@ -24,14 +25,15 @@ export class NodeService {
     }
 
     search(urlTerm, body, serviceType, otherParameters: Array<any>): any {
+        // console.log(body);
         this.spinner.show();
         const headers = this.headers;
         this.http.post<any>(this.url + urlTerm, body, {headers}).subscribe(data => {
             let results: Result;
             results = serviceType.getResult(data, otherParameters);
             this.communicationService.setResult(results);
-            console.log(results);
-            console.log(data);
+            // console.log(results);
+            // console.log(data);
             this.spinner.hide();
         }, err => {
             alert(environment.textAlertSemSearchError);
@@ -39,11 +41,20 @@ export class NodeService {
         });
     }
 
-    suggest(key): any {
+    suggestSimple(key): any {
         const body = {
             term: key
         };
-        return this.http.post<any>(this.url + this.suggestURL, body);
+        const headers = this.headers;
+        return this.http.post<any>(this.url + this.suggestPanUrl, body, {headers});
+    }
+
+    suggestTerminology(key): any {
+        const body = {
+            term: key
+        };
+        const headers = this.headers;
+        return this.http.post<any>(this.url + this.suggestTerUrl, body, {headers});
     }
 
     addToBasket(itemInDatabase): any {
