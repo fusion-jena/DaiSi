@@ -388,7 +388,7 @@ router.post('/addToBasket', (req, res) => {
     // pool.query(sql,[req.body.userId,req.body.basketContent], function (err, result, fields) {
     //     if (err) throw new Error(err)
     // })
-    res.status(201).send(res);
+    res.status(200);
 })
 // router.post('/addToBasket', (req, res) => {
 //     var sql = "INSERT INTO basket (user_id,data_id,data) VALUES(?,?,?)";
