@@ -28,7 +28,7 @@
     "mysql2": "^2.3.3",
     "node-blob": "0.0.2",
     "node-zip": "^1.0.1",
-    "sequelize": "^6.16.0",
+    "sequelize": "^6.28.2",
     "swagger-jsdoc": "^6.1.0",
     "swagger-ui-express": "^4.3.0"
   }
